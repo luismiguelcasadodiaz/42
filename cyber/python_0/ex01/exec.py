@@ -63,4 +63,4 @@ if __name__ == "__main__":
         text_to_reverse = treat_argv(sys.argv[1:])
         reversed_text = reverse_str(text_to_reverse)
         swapped = swap_case(reversed_text)
-        sys.exit(swapped)
+        sys.exit(swapped+"\r")
