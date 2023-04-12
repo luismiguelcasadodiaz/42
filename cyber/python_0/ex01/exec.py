@@ -1,14 +1,18 @@
 #!/usr/bin/python3
-""" Make a program that takes a string as argument, reverses it, swaps its letters case
-and print the result.
-• If more than one argument are provided, merge them into a single string with each
-argument separated by a space character.
-• If no argument are provided, do nothing or print an usage.
+""" Make a program that takes a string as argument,
+    reverses it, swaps its letters case
+    and print the result.
+    • If more than one argument are provided,
+      merge them into a single string with each
+      argument separated by a space character.
+    • If no argument are provided, do nothing or print an usage.
 """
+
 
 import sys
 
-def reverse_str(text:str)->str:
+
+def reverse_str(text: str) -> str:
 
     """
     PARAMETERS
@@ -17,11 +21,13 @@ def reverse_str(text:str)->str:
         Reversed text
 
     This function reverse the string using [-1::-1] notation
-    that is :start in the last char and step towarda the left one char aeach time
+    that is :start in the last char and step towarda the left
+    one char aeach time
     """
     return text[-1::-1]
 
-def swap_case(text:str)->str:
+
+def swap_case(text: str) -> str:
 
     """
     PARAMETERS
@@ -29,7 +35,7 @@ def swap_case(text:str)->str:
     RETURNS
         Text wiht swapped case
     """
-    swapped_text=""
+    swapped_text = ""
     for y in range(len(text)):
         if text[y].isupper():
             swapped_text = swapped_text + text[y].lower()
@@ -37,7 +43,8 @@ def swap_case(text:str)->str:
             swapped_text = swapped_text + text[y].upper()
     return swapped_text
 
-def treat_argv(arguments:list)->str:
+
+def treat_argv(arguments: list) -> str:
 
     """
     PARAMETERS
@@ -46,6 +53,7 @@ def treat_argv(arguments:list)->str:
         a string that joins all arguments separated by space
     """
     return " ".join(arguments)
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
@@ -56,5 +64,3 @@ if __name__ == "__main__":
         reversed_text = reverse_str(text_to_reverse)
         swapped = swap_case(reversed_text)
         sys.exit(swapped)
-
-
