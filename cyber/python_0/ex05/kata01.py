@@ -4,5 +4,5 @@ kata = {
         'Ruby': 'Yukihiro Matsumoto',
         'PHP': 'Rasmus Lerdorf',
         }
-for k,v in kata.items():
-    print("{} was created bu {}".format(k,v))
+for k, v in kata.items():
+    print("{} was created by {}".format(k, v))
