@@ -26,15 +26,7 @@ def format_output(tot: int, up: int, lo: int, pu: int, sp: int):
     print("- {} space(s)".format(sp))
 
 
-def text_analyser(arg: str):
-    """
-    This function counts the number of upper characters,
-    lower characters, punctuation and spaces in a given text.
-    PARAMETERS
-        a text string to make statisics on it
-    RETURNS
-        nothing
-    """
+def counter(arg: str):
     # counters set up
     tot = len(arg)
     up = 0
@@ -48,11 +40,37 @@ def text_analyser(arg: str):
             lo = lo + 1
         elif arg[i] in string.punctuation:
             pu = pu + 1
+            print("--",arg[i])
         elif arg[i].isspace():
             sp = sp + 1
 
     format_output(tot, up, lo, pu, sp)
 
+
+
+
+
+def text_analyser(*arg):
+    """
+    This function counts the number of upper characters,
+    lower characters, punctuation and spaces in a given text.
+    PARAMETERS
+        a text string to make statisics on it
+    RETURNS
+        nothing
+    """
+    print(arg)
+    if  isinstance(arg[0], int):
+        raise AssertionError("argument is not a string")
+    correct_arg = False
+    while not correct_arg:
+        if arg is None or arg == "":
+            arg = input("Please enter the text to analuse:").strip()
+            if len(arg) != 0:
+                correct_arg = True
+        else:
+            correct_arg = True
+    counter(arg)
 
 if __name__ == "__main__":
     num_args = len(sys.argv)
