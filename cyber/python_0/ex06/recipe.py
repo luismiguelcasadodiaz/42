@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+
+import sys
 """
 Part 1 Nested Dictionaries
 Create a dictionary called cookbook.
@@ -43,3 +45,65 @@ recipe = {
         "prep_time": 15,
         }
 cookbook["salad"] = recipe
+
+"""
+Part 2 : A series of Helpful Functions
+Create a series of useful functions to handle your cookbook:
+
+1. A function that print all recipe names.
+"""
+
+
+def print_all():
+    for k in cookbook.keys():
+        print_recipe(k)
+
+
+"""
+
+2. A function that takes a recipe name and print its details.
+"""
+
+
+def print_recipe(name: str):
+    print("Recipe for {}".format(name))
+    print("\tIngredientes list: {}".format(cookbook[name]["ingredients"]))
+    print("\tTo be eaten for {}.".format(cookbook[name]["meal"]))
+    print("\tTakes {} minutes of cooking.".format(cookbook[name]["prep_time"]))
+    print()
+
+
+"""
+3. A function that takes a recipe name and delete it.
+"""
+
+
+def delete_recipe(name: str):
+    cookbook.pop(name)
+
+
+"""
+4. A function that add a recipe from user input.
+    You will need a name, a list of ingredient,
+    a meal type and a preparation time.
+"""
+
+
+def add_recipe():
+    name = input("Enter a name:").strip()
+    print("Enter ingredients (one per line. Ctrl-D to end)")
+    raw_ingredients = sys.stdin.readlines()
+    ingredients = [raw_ingredient.strip() for raw_ingredient in raw_ingredients]
+    meal = input("Ener a meal type:").strip()
+    time = input("Enter a preparation time:").strip()
+    recipe = {
+            "ingredients": ingredients,
+            "meal":meal,
+            "prep_time": time,
+            }
+    cookbook[name] = recipe
+
+
+if __name__ == "__main__":
+    add_recipe()
+    print_all()
