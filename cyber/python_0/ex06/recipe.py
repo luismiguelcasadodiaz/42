@@ -116,7 +116,7 @@ def show_menu():
     os.system('clear')
     print("List of available option:")
     for num, text in enumerate(menu_options):
-        print("\t{}: {}".format(num, text))
+        print("\t{}: {}".format(num + 1, text))
 
 
 def read_selection():
@@ -126,10 +126,26 @@ def read_selection():
         raw_option = input("Please select an option:")
         if raw_option.isnumeric():
             option = int(raw_option)
-            if option < num_options:
+            if option <= num_options:
                 correcto = True
-
+            else:
+                print("Option {} does not exist.".format(option))
+        else:
+            print("A letter is not an option.")
     return option
+
+
+def read_recipe_name():
+    recipe_name = ""
+    good_name = False
+    while not good_name:
+        raw_recipe = input("Please enter a recipe name to get its details:")
+        recipe_name = raw_recipe.strip()
+        if recipe_name not in cookbook:
+            print("Recipe {} does not exits".format(recipe_name))
+        else:
+            good_name = True
+    return recipe_name
 
 
 if __name__ == "__main__":
@@ -140,10 +156,12 @@ if __name__ == "__main__":
         if option == 1:
             add_recipe()
         elif option == 2:
-            delete_recipe()
+            delete_recipe(read_recipe_name())
         elif option == 3:
-            print_recipe()
+            print_recipe(read_recipe_name())
         elif option == 4:
             print_all()
         elif option == 5:
             quit = True
+        option = input("Press Enter to continue") if not quit else None
+    print("Cookbook closed. Goodbye !")
