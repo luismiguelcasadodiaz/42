@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import sys
+import os
 """
 Part 1 Nested Dictionaries
 Create a dictionary called cookbook.
@@ -93,17 +94,56 @@ def add_recipe():
     name = input("Enter a name:").strip()
     print("Enter ingredients (one per line. Ctrl-D to end)")
     raw_ingredients = sys.stdin.readlines()
-    ingredients = [raw_ingredient.strip() for raw_ingredient in raw_ingredients]
+    ingredients = [raw_ingredient.strip()
+                   for raw_ingredient in raw_ingredients]
     meal = input("Ener a meal type:").strip()
     time = input("Enter a preparation time:").strip()
     recipe = {
             "ingredients": ingredients,
-            "meal":meal,
+            "meal": meal,
             "prep_time": time,
             }
     cookbook[name] = recipe
 
 
+# create a list of options to be displayes as a menu
+menu_options = ["Add a recipe", "Delete a recipe",
+                "Print a recipe", "Print the cookbook", "quit"]
+num_options = len(menu_options)
+
+
+def show_menu():
+    os.system('clear')
+    print("List of available option:")
+    for num, text in enumerate(menu_options):
+        print("\t{}: {}".format(num, text))
+
+
+def read_selection():
+    correcto = False
+    option = 0
+    while not correcto:
+        raw_option = input("Please select an option:")
+        if raw_option.isnumeric():
+            option = int(raw_option)
+            if option < num_options:
+                correcto = True
+
+    return option
+
+
 if __name__ == "__main__":
-    add_recipe()
-    print_all()
+    quit = False
+    while not quit:
+        show_menu()
+        option = read_selection()
+        if option == 1:
+            add_recipe()
+        elif option == 2:
+            delete_recipe()
+        elif option == 3:
+            print_recipe()
+        elif option == 4:
+            print_all()
+        elif option == 5:
+            quit = True
