@@ -40,17 +40,26 @@ def counter(arg: str):
             lo = lo + 1
         elif arg[i] in string.punctuation:
             pu = pu + 1
-            print("--",arg[i])
         elif arg[i].isspace():
             sp = sp + 1
 
     format_output(tot, up, lo, pu, sp)
 
 
+def ask_txt() -> str:
+    correct_arg = False
+    while not correct_arg:                     # so i read one
+        the_arg = input("Please enter the text to analyse:").strip()
+        if len(the_arg) != 0:
+            try:
+                the_arg = int(the_arg)         # and check is not int
+                print("AssertionError: argument is not a string")
+            except ValueError:
+                correct_arg = True
+    return the_arg
 
 
-
-def text_analyser(*arg):
+def text_analyser(*my_arg):
     """
     This function counts the number of upper characters,
     lower characters, punctuation and spaces in a given text.
@@ -59,23 +68,29 @@ def text_analyser(*arg):
     RETURNS
         nothing
     """
-    print(arg)
-    if  isinstance(arg[0], int):
-        raise AssertionError("argument is not a string")
-    correct_arg = False
-    while not correct_arg:
-        if arg is None or arg == "":
-            arg = input("Please enter the text to analuse:").strip()
-            if len(arg) != 0:
-                correct_arg = True
-        else:
-            correct_arg = True
-    counter(arg)
+    print(my_arg, len(my_arg))
+    if len(my_arg) > 1:  # more than one argument
+        print("This function only accepts one argument")
+        return
+    if my_arg == () or my_arg == ('',):            # i got no argument
+        the_arg = ask_txt()
+    else:                                          # I got  one argument
+        try:
+            print(my_arg[0])
+            the_arg = int(my_arg[0])         # and check if int
+            print("AssertionError: argument is not a string")
+            the_arg = ask_txt()              # as it is i ask new argument
+        except ValueError:
+            the_arg = my_arg[0]              # as it is not i procced
+    counter(the_arg)
+
 
 if __name__ == "__main__":
     num_args = len(sys.argv)
-    if num_args > 2 or num_args == 1:
+    if num_args == 1:
+        text_analyser("")
+    elif num_args == 2:
+        text_analyser(sys.argv[1])
+    else:
         print("Usage is: count.py <string>")
         sys.exit(-1)
-    else:
-        text_analyser(sys.argv[1])
