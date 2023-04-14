@@ -56,8 +56,11 @@ Create a series of useful functions to handle your cookbook:
 
 
 def print_all():
-    for k in cookbook.keys():
-        print_recipe(k)
+    if cookbook != {}:
+        for k in cookbook.keys():
+            print_recipe(k)
+    else:
+        print("The cookbook is empty")
 
 
 """
@@ -81,6 +84,7 @@ def print_recipe(name: str):
 
 def delete_recipe(name: str):
     cookbook.pop(name)
+    print("Recipe {} deleted".format(name))
 
 
 """
