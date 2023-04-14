@@ -10,7 +10,7 @@
 
 
 import sys
-
+import string
 
 def reverse_str(text: str) -> str:
 
@@ -37,7 +37,9 @@ def swap_case(text: str) -> str:
     """
     swapped_text = ""
     for y in range(len(text)):
-        if text[y].isupper():
+        if text[y] in string.punctuation:
+            swapped_text = swapped_text + text[y]
+        elif text[y].isupper():
             swapped_text = swapped_text + text[y].lower()
         else:
             swapped_text = swapped_text + text[y].upper()
@@ -60,7 +62,8 @@ if __name__ == "__main__":
         print("Usage is: exec.py string1 string2 stringN")
         sys.exit(-1)
     else:
+        print(sys.argv[1:])
         text_to_reverse = treat_argv(sys.argv[1:])
         reversed_text = reverse_str(text_to_reverse)
         swapped = swap_case(reversed_text)
-        sys.exit(swapped+"\r")
+        print(swapped)
