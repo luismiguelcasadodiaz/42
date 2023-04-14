@@ -35,7 +35,7 @@ if __name__ == "__main__":
         print("Usage is: whois.py Number")
         sys.exit(-1)
     elif num_args > 2:
-        raise AssertionError("more than one argument are provided")
+        print("AssertionError: more than one argument are provided")
     else:
         try:
             number_to_evaluate = int(sys.argv[1])
