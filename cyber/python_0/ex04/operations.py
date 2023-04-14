@@ -32,15 +32,18 @@ def operate(a: int, b: int):
 
 if __name__ == "__main__":
     num_args = len(sys.argv)
-    if num_args == 1:
+    if num_args < 3:
         print("Usage is: python operations.py <number1> <number2>")
         print("Example:")
         print("\tpython operations 10 3")
         sys.exit(-1)
     elif num_args > 3:
-        raise AssertionError("too many arguments")
+        print("AssertionError: too many arguments")
         sys.exit(-1)
-    elif not sys.argv[1].isnumeric() or not sys.argv[2].isnumeric():
-        raise AssertionError("only integers")
     else:
-        operate(int(sys.argv[1]), int(sys.argv[2]))
+        try:
+            a = int(sys.argv[1])
+            b = int(sys.argv[2])
+            operate(a, b)
+        except:
+            print("AssertionError: only integers")
