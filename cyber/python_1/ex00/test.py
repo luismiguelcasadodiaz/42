@@ -103,7 +103,7 @@ def read_recipe_name():
 if __name__ == "__main__":
     cookbook = Book("Luis")
     recipe1 = Recipe("tortilla", 3, 45, ["patatas", "huevos", "aceite", "sal"], "pelar, batir, mezclar freir", "lunch")
-    recipe2 = Recipe("Sandwich", 2, 30, ["ham", "bread", "cheese", "tomatoes"], "cortar untar colocar", "lunch")
+    recipe2 = Recipe("sandwich", 2, 30, ["ham", "bread", "cheese", "tomatoes"], "cortar untar colocar", "lunch")
     recipe3 = Recipe("cake", 4, 60, ["flour", "sugar", "eggs"], "mezclar todo", "dessert")
     recipe4 = Recipe("salad",2, 15,  ["avocado", "arugula", "tomatoes", "spinach"],"Alinyar","lunch")
     cookbook.add_recipe(recipe1)

@@ -124,10 +124,10 @@ class Recipe:
               line3 + \
               line4 + \
               line5
-        return txt
+        return line1
 
         def __repr__(self):
-            pass
+            return f"Recipe {self.name} his made of {self.ingredients}"
 
 
 if __name__ == '__main__':

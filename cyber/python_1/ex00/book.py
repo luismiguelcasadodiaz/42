@@ -36,24 +36,54 @@ class Book:
     def get_recipe_by_name(self, name):
         """Prints a recipe with the name \texttt{name} and returns the instance""" 
         #... Your code here ...
-        for key in self.recipes.keys():
-            key_list = get_recipes_by_types(key)
-            for arecipe in key_list:
-                if name == arecipe.name:
-                    print(arecipe)
-
+        found = False
+        for arecipe in self:
+            print(arecipe)
+            if name == arecipe.name:
+                found = True
+                the_recipe = arecipe
+        if found:
+            print(therecipe)
+        else:
+            print(f"{name} not found in {self.name}")
         
     def get_recipes_by_types(self, recipe_type):
         """Get all recipe names for a given recipe_type """ 
-        return self.recipes[recipe_type]
+        return self.recipes[recipe_type][1:]
         
         
 
     def add_recipe(self, recipe):
         """Add a recipe to the book and update last_update""" 
-        self.recipes[recipe.recipe_type].append(recipe)
+        if recipe.name not in self:
+            self.recipes[recipe.recipe_type].append(recipe)
+            print(f"Recipe {recipe.name} added as {recipe.recipe_type}")
+            self.last_update = self.set_creation_date()
+        else:
+            print(f"The book already has a {recipe.name}")
         
 
     def print_all(self):
-        for k in self.recipes.keys():
-            self.get_recipes_by_types(k)
+        print(f"recipes in {self.name}")
+        print("="*40)
+        for k in self:
+            print(str(k))
+        print("="*40)
+
+    def __iter__(self):
+        all_recipes = []
+        for key in self.recipes.keys():
+            key_list = self.get_recipes_by_types(key)
+            for arecipe in key_list:
+                all_recipes.append(arecipe)
+        for recipe in all_recipes:
+            yield recipe
+
+    def __contains__(self, onename):
+        exist = False
+        for recipe in self:
+            if recipe.name == onename:
+                exist = True
+        return exist
+
+
