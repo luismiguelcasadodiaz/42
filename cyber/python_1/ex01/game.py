@@ -19,12 +19,12 @@ class GotCharacter:
     def __str__(self):
                 
         if self.is_alive:
-            return f"I am {self.first_name} and i am alive"
+            return f"I am '{self.first_name}' and i am alive"
         else:        
-            return f"I an the soul of {self.first_name} that passed away"
+            return f"I an the soul of '{self.first_name}' that passed away"
     
     def __repr__(self):
-        return f"GotCharacter({self.first_name}, {self.is_alive})"
+        return f"GotCharacter('{self.first_name}', {self.is_alive})"
 
 """
 
@@ -41,7 +41,7 @@ class Lannister(GotCharacter):
         or when bad things happen to good people.
     """
     def __init__(self, first_name ="No Name given", is_alive = True):
-        super().__init(first_name = first_name, is_alive = True)
+        super().__init__(first_name = first_name, is_alive = True)
         self.famuly_name ="Lannister"
         self.house_words = "Hear Me Roar"
 
@@ -72,11 +72,16 @@ class Lannister(GotCharacter):
 
 
 if __name__ == "__main__":
+    pepe = GotCharacter("LUis")
+    print("pepe", pepe)
+    pepo = eval(repr(pepe))
+    print("Pepo",pepo)
     arya = Lannister("Arya")
     print(arya)
     arya.print_house_words()
     print(arya.is_alive)
     arya.die()
-    print(arya.die)
+    print(arya.is_alive)
     arya.die()
     print(arya.__doc__)
+    print(arya)
