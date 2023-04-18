@@ -10,6 +10,7 @@ The Book class also has some attributes:
 
 """
 from datetime import datetime
+import copy
 
 class Book:
     __empty_recipes_list = {"starter": [],
@@ -19,7 +20,8 @@ class Book:
 
     def __init__(self, name: str):
         self.name = name
-        self.recipes = self.__empty_recipes_list
+        #self.recipes = self.__empty_recipes_list
+        self.recipes = copy.deepcopy(self.__empty_recipes_list)
         self.last_update = None  # at creation time there is not update
         self.creation_date = self.set_creation_date()
 
@@ -33,23 +35,26 @@ class Book:
         return 
 
 
-    def get_recipe_by_name(self, name):
+    def get_recipe_by_name(self, name=None):
         """Prints a recipe with the name \texttt{name} and returns the instance""" 
         #... Your code here ...
         found = False
         for arecipe in self:
-            print(arecipe)
             if name == arecipe.name:
                 found = True
                 the_recipe = arecipe
         if found:
-            print(therecipe)
+            print(the_recipe)
+            return the_recipe
         else:
             print(f"{name} not found in {self.name}")
         
-    def get_recipes_by_types(self, recipe_type):
-        """Get all recipe names for a given recipe_type """ 
-        return self.recipes[recipe_type][1:]
+    def get_recipes_by_types(self, recipe_type=""):
+        """Get all recipe names for a given recipe_type """
+        if recipe_type not in self.recipes:
+            print(f"{recipe_type} is not a validad recipe type")
+        else:
+            return self.recipes[recipe_type]
         
         
 
