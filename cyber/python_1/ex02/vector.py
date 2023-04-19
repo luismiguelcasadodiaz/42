@@ -151,52 +151,122 @@ class Vector:
     
     # add & radd : only vectors of same shape.
     
-    def __add__(self, obj):
+    def __add__(self, other):
+        if self.shape == other.shape:
+            result_list = []
+            if self.shape[0] == 1:
+                # both ROW vectors
+                # [[0.0, ... , n.0]] . [[0.0, ... , n.0]]
+                for idx in range(self.shape[1]):
+                    result_list.append(self.values[0][idx] + other.values[0][idx])
+                return Vector([result_list])
+            if self.shape[1] == 1:
+                # both COL vectors
+                # [[0.0], ..., [n.0]] . [[0.0], ..., [n.0]]
+                for idx in range(self.shape[0]):
+                    result_list.append([self.values[idx][0] + other.values[idx][0]])
+                return Vector(result_list)
+        else:
+            raise ValueError(f"ADD:Shape {self.shape} is compatible with {other.shape}")
+   
+    def __radd__(self, other):
+        return self.__add__(other, self)
+
+    # sub & rsub: only vectors of same shape.
+
+    def __sub__(self, obj):
         if self.shape == obj.shape:
             result_list = []
             if self.shape[0] == 1:
                 # both ROW vectors
                 # [[0.0, ... , n.0]] . [[0.0, ... , n.0]]
                 for idx in range(self.shape[1]):
-                    result_list.append(self.values[0][idx] + obj.values[0][idx])
+                    result_list.append(self.values[0][idx] - obj.values[0][idx])
                 return Vector([result_list])
             if self.shape[1] == 1:
                 # both COL vectors
                 # [[0.0], ..., [n.0]] . [[0.0], ..., [n.0]]
                 for idx in range(self.shape[0]):
-                    result_list.append([self.values[idx][0] + obj.values[idx][0]])
+                    result_list.append([self.values[idx][0] - obj.values[idx][0]])
                 return Vector(result_list)
         else:
-            raise ValueError(f"ADD:Shape {self.shape} is compatible with {obj.shape}")
-   
-
-    def __radd__(self, obj):
-        if self.shape == obj.shape:
-            pass
-    # sub & rsub: only vectors of same shape.
-
-    def __sub__(self, obj):
-        if self.shape == obj.shape:
-            pass
-    def __rsub__(self, obj):
-        if self.shape == obj.shape:
-            pass
+            raise ValueError(f"SUB:Shape {self.shape} is compatible with {obj.shape}")
+        
+    def __rsub__(other, self):
+        return self.__sub__(other, self)
 
     # truediv : only with scalars (to perform division of Vector by a scalar).
-    def __truediv__(self, obj):
-        pass
+    def __truediv__(self, other):
+        if isinstance(other, int) or isinstance(other, float):
+            if other == 0:
+                raise ValueError(f"TRUEDIV: {other} is not a good divisor")
+            result_list = []
+            if self.shape[0] == 1:
+                # both ROW vectors
+                # [[0.0, ... , n.0]] . [[0.0, ... , n.0]]
+                for idx in range(self.shape[1]):
+                    result_list.append(self.values[0][idx] / other)
+                return Vector([result_list])
+            if self.shape[1] == 1:
+                # both COL vectors
+                # [[0.0], ..., [n.0]] . [[0.0], ..., [n.0]]
+                for idx in range(self.shape[0]):
+                    result_list.append([self.values[idx][0] / other])
+                return Vector(result_list)
+        else:
+            raise ValueError(f"TRUEDIV: '{other}' is not an escalar to divide by")
+        
     
     # rtruediv : raises an NotImplementedError with the message "Division of a scalar by a Vector is not defined here."
-    def __rtruediv__(self, obj):
-        pass
+    def __rtruediv__(other, self):
+        raise NotImplementedError(f"RTRUEDIV:Division of a scalar {other} by a Vector is not defined here.")
 
 
 
-    # mul & rmul: only scalars (to perform multiplication of Vector by a scalar).
-    def __mul__(self, obj):
-            pass
-    def __rmul__(self, obj):
-            pass
+    # mul & rmul: only SCALARS (to perform multiplication of Vector by a scalar).
+    def __mul__(self, other):
+        if isinstance(other, int) or isinstance(other, float):
+            result_list = []
+            if self.shape[0] == 1:
+                # both ROW vectors
+                # [[0.0, ... , n.0]] . [[0.0, ... , n.0]]
+                for idx in range(self.shape[1]):
+                    result_list.append(self.values[0][idx] * other)
+                return Vector([result_list])
+            if self.shape[1] == 1:
+                # both COL vectors
+                # [[0.0], ..., [n.0]] . [[0.0], ..., [n.0]]
+                for idx in range(self.shape[0]):
+                    result_list.append([self.values[idx][0] * other])
+                return Vector(result_list)
+        else:
+            raise ValueError(f"MUL: '{other}' is not an escalar to multiply by")
+
+    def __rmul__(other, self):
+        if isinstance(self, int) or isinstance(self, float):
+            result_list = []
+            if other.shape[0] == 1:
+                # both ROW vectors
+                # [[0.0, ... , n.0]] . [[0.0, ... , n.0]]
+                for idx in range(other.shape[1]):
+                    result_list.append(other.values[0][idx] * self)
+                return Vector([result_list])
+            if other.shape[1] == 1:
+                # both COL vectors
+                # [[0.0], ..., [n.0]] . [[0.0], ..., [n.0]]
+                for idx in range(other.shape[0]):
+                    result_list.append([other.values[idx][0] * self])
+                return Vector(result_list)
+        else:
+                raise ValueError(f"RMUL: '{self}' is not an escalar to multiply by")
 
 
  
+v1 = Vector(4)
+print(v1)
+v = v1 * 5
+print(v)
+v2 = 5 * v1
+print(v)
+v = v2 / 0
+print(v)
