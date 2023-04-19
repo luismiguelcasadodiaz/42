@@ -40,6 +40,7 @@ class Book:
         and returns the instance
         """
         found = False
+        the_recipe = None
         for arecipe in self:
             if name == arecipe.name:
                 found = True
@@ -48,7 +49,7 @@ class Book:
             print(the_recipe)
             return the_recipe
         else:
-            print(f"\texttt{name} not found in {self.name}")
+            print(f"\texttt {name} not found in {self.name}")
 
     def get_recipes_by_types(self, recipe_type=""):
         """Get all recipe names for a given recipe_type """

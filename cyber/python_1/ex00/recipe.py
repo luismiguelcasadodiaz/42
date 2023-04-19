@@ -42,15 +42,17 @@ class Recipe:
 
     @name.setter
     def name(self, value: str):
+        thename = ""
         for char in value:
             if char in string.ascii_letters or char == " ":
-                self._name = value
+                thename = thename + char
             else:
                 raise ValueError("Recipe name accepts only letters and spaces")
+        self._name = thename
 
     @property
     def cooking_lvl(self) -> int:
-        return self.cooking_time
+        return self._cooking_lvl
 
     @cooking_lvl.setter
     def cooking_lvl(self, value: int):
@@ -58,13 +60,13 @@ class Recipe:
            self.__MIN_LVL <= value and value <= self.__MAX_LVL:
             self._cooking_lvl = value
         else:
-            msg = f"Recipe level out of range:
+            msg = f"Recipe level out of range: \
                 {self.__MIN_LVL}..{self.__MAX_LVL}"
             raise ValueError(msg)
 
     @property
     def cooking_time(self) -> int:
-        return self.cooking_time
+        return self._cooking_time
 
     @cooking_time.setter
     def cooking_time(self, value: int):
@@ -75,7 +77,7 @@ class Recipe:
 
     @property
     def ingredients(self) -> list:
-        return self.ingredients
+        return self._ingredients
 
     @ingredients.setter
     def ingredients(self, value: list):
@@ -86,7 +88,7 @@ class Recipe:
 
     @property
     def description(self) -> str:
-        return self.description
+        return self._description
 
     @description.setter
     def description(self, value: str):
@@ -125,7 +127,7 @@ class Recipe:
             line3 + \
             line4 + \
             line5
-        return line1
+        return txt
 
         def __repr__(self):
             return f"Recipe {self.name} his made of {self.ingredients}"
