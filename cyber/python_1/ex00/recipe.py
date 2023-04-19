@@ -9,7 +9,6 @@ It has some attributes:
     • ingredients (list): list of all ingredients each represented by a string,
     • description (str): description of the recipe,
     • recipe_type (str): can be "starter", "lunch" or "dessert".
- 
 """
 
 import string
@@ -21,13 +20,13 @@ class Recipe:
     __MAX_LVL = 5
 
     def __init__(self,
-                n: str,     # name of the recipe,
-                c_l: int,      # range from MIN_LVL to MAX_LVL
-                c_t: int,      # in minutes (no negative numbers)
-                ingre: list,   # ingredients' list. One string per ingredient
-                desc: str,     # description of the recipe,
-                r_type: str    # can be "starter", "lunch" or "dessert"
-                ):
+                 n: str,     # name of the recipe,
+                 c_l: int,      # range from MIN_LVL to MAX_LVL
+                 c_t: int,      # in minutes (no negative numbers)
+                 ingre: list,   # ingredients' list. One string per ingredient
+                 desc: str,     # description of the recipe,
+                 r_type: str    # can be "starter", "lunch" or "dessert"
+                 ):
         self.name = n
         self.cooking_lvl = c_l
         self.cooking_time = c_t
@@ -55,10 +54,12 @@ class Recipe:
 
     @cooking_lvl.setter
     def cooking_lvl(self, value: int):
-        if isinstance(value, int) and self.__MIN_LVL <= value and value <= self.__MAX_LVL:
+        if isinstance(value, int) and \
+           self.__MIN_LVL <= value and value <= self.__MAX_LVL:
             self._cooking_lvl = value
         else:
-            msg = f"Recipe level out of range: {self.__MIN_LVL}..{self.__MAX_LVL}"
+            msg = f"Recipe level out of range:
+                {self.__MIN_LVL}..{self.__MAX_LVL}"
             raise ValueError(msg)
 
     @property
@@ -81,7 +82,7 @@ class Recipe:
         if isinstance(value, list) and value != []:
             self._ingredients = value
         else:
-            raise ValueError("A non list type or empty  used to set ingredients")
+            raise ValueError("Non list type or empty used to set ingredients")
 
     @property
     def description(self) -> str:
@@ -119,11 +120,11 @@ class Recipe:
         line5 = f"Instructions:\n\t{self._description}\n"
         line6 = f"Recipe type : {self._recipe_type}\n"
         txt = line1 + \
-              line2 + \
-              line6 + \
-              line3 + \
-              line4 + \
-              line5
+            line2 + \
+            line6 + \
+            line3 + \
+            line4 + \
+            line5
         return line1
 
         def __repr__(self):
@@ -131,5 +132,7 @@ class Recipe:
 
 
 if __name__ == '__main__':
-    recipe2 = Recipe("tortilla", 3, 45, ["patatas", "huevos", "aceite", "sal"], "pelar, batir, mezclar freir", "lunch")
+    recipe2 = Recipe("tortilla", 3, 45,
+                     ["patatas", "huevos", "aceite", "sal"],
+                     "pelar, batir, mezclar freir", "lunch")
     print(recipe2)
