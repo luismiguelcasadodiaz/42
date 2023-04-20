@@ -32,11 +32,11 @@ class Account(object):
 
 class Bank(object):
     """The bank"""
-    def __init__(self): 
+    def __init__(self):
         self.accounts = []
 
     def add(self, new_account=None):
-        """ 
+        """
         Add new_account in the Bank verification has to be performed when
         account objects are added to to Bank instance
 
@@ -45,17 +45,18 @@ class Bank(object):
 
 
         """
-        # test if new_account is an Account() instance and if 
+        # test if new_account is an Account() instance and if
         # it can be appended to the attribute accounts
         if new_account not is none:
             if isinstance(new_account, Account) and \
-                self.account_to_add_ok(Account):
-                    self.accounts.append(new_account)
-                    return True
+                    self.account_to_add_ok(Account):
+                self.accounts.append(new_account)
+                return True
             else:
                 return False
         else:
-            raise ValueError(f"ADD:Account '{new_account}' is not a valid account")
+            msg = f"ADD:Account '{new_account}' is not a valid account"
+            raise ValueError(msg)
 
     def transfer(self, origin, dest, amount):
         """" Perform the fund transfer
@@ -76,7 +77,9 @@ class Bank(object):
             msg = f"TRANSFER: '{origin.name} has less than '{amount}'"
             raise ValueError(msg)
 
-        if
+        # TODO: verificate that are not corropte accounts
+        # TODO: Treat the case of transfert between same Account
+
     def fix_account(self, name):
         """ fix account associated to name if corrupted
         @name:   str(name) of the account
@@ -88,23 +91,142 @@ class Bank(object):
         checking if account's name already exist in the bank
         TODO: Verify Account type
         """
-        
+
         accoun_exist = False
         for a in self.accounts:
             if account.name == a.name:
                 account_exist = True
                 break
-        if account_exist: return False
+        if account_exist:
+            return False
 
-    def not_corrupted_account(account):
-        if event_num_atrributes(account) or
-            an_attribute_start_with_b(a)
-        
-        
-        
-        
-        
-        event_num_atrributes = len(account.__dict__) % 2 == 0
-        an_attribute_start 
-                
+    def not_corrupted_account(acc):
+        """
+        Check if any of corrpted account condition exist
+        RETURN
+            True if the account is not corrupted
+            False Otherwise
+        """
+        if event_num_atrributes(acc) or \
+                an_attri_start_w_b(acc) or \
+                no_attri_start_w_z_or_a(acc) or \
+                no_attr_n_i_v(acc) or \
+                name_no_str(acc) or \
+                id_not_int(acc) or \
+                value_not_int_or_float(acc):
+            return False
+        else:
+            return True
 
+    def event_num_atrributes(acc):
+        """ """
+        # TODO: watch inside a dictionary's class
+        return (len(acc.__dict__) % 2 == 0)
+
+    def an_attri_start_w_b(acc):
+        """ check first letter of each attibute"""
+        for k in acc.__dict__Keys():
+            if k[0].lower == "b":
+                return True
+
+    def no_attri_start_w_z_or_a(acc):
+        """ verifies attributes startin with zip or addr
+            no_zip   or no_addr     Corrupted
+            ======      =======     =========
+            True        True        True
+            True        False       True
+            False       True        True
+            False       False       False
+        """
+        no_zip = True
+        no_addr = True
+
+        for k in acc.__dict__keys():
+            if k.lower().startswidth("zip"):
+                no_zip = False
+                break
+        for k in acc.__dict__keys():
+            if k.lower().startswidth("addr"):
+                no_addr = False
+                break
+        return (no_zip or no_addr)
+
+    def no_attr_n_i_v(acc):
+        """ Verifies existence of name, id and value
+            no_name  or no_id  or no_value   Corrupted
+            =======     =====     ========   =========
+            True        True        True      True
+            True        True        False     True
+            True        False       True      True
+            True        False       False     True
+            False       True        True      True
+            False       True        False     True
+            False       False       True      True
+            False       False       False     False
+        """
+        no_name = True
+        no_id = True
+        no_value = True
+
+        for k in acc.__dict__keys():
+            if k.lower() == "name":
+                no_name = False
+                break
+        for k in acc.__dict__keys():
+            if k.lower() == "id":
+                no_id = False
+                break
+        for k in acc.__dict__keys():
+            if k.lower() == "value":
+                no_value = False
+                break
+        return (no_name or no_id or no_value)
+
+    def no_attr_n_i_v(acc):
+        """ Verifies existence of name, id and value
+            no_name  or no_id  or no_value   Corrupted
+            =======     =====     ========   =========
+            True        True        True      True
+            True        True        False     True
+            True        False       True      True
+            True        False       False     True
+            False       True        True      True
+            False       True        False     True
+            False       False       True      True
+            False       False       False     False
+        """
+        checks = {"no_name": True, "no_id": True, "no_value": True}
+
+        for k in acc.__dict__keys():
+            if k.lower() == "name":
+                checks["no_name"] = False
+            if k.lower() == "id":
+                checks["no_id"] = False
+            if k.lower() == "addr":
+                checks["no_value"] = False
+        # when no value is true, means all are false, so corrupted is false
+        return any(checks.values())
+
+    def name_no_str(acc):
+        if hasattr(acc, "name"):
+            # isinstance is false when name is not STR.So Corruptes is true
+            return not isinstance(acc.name, str)
+        else:
+            # Has not name, so name_no_str is true
+            return True
+
+    def id_not_int(acc):
+        if hasattr(acc, "id"):
+            # isinstance is false when id  is not INT.So Corruptes is true
+            return not isinstance(acc.id, int)
+        else:
+            # Has not id, so id_not_int is true
+            return True
+
+    def value_not_int_or_float(acc):
+        if hasattr(acc, "value"):
+            # isinstance is false when id  is not INT.So Corruptes is true
+            return not isinstance(acc.id, (int | float))
+        else:
+            # Has not value, so value_not_int_or_float is true
+            return True
