@@ -6,11 +6,6 @@ class Vector:
         self.shape
         self.__type
 
-    def _my_shape():
-        pass
-    def _my_type():
-        pass
-
     @property
     def values(self) -> list:
         return self._values
@@ -25,7 +20,6 @@ class Vector:
             else:
                 raise ValueError(f"{argument} is not a list of list")
 
-
         # initialize as size
         elif isinstance(argument, int):
             if argument == 0:
@@ -35,10 +29,8 @@ class Vector:
                 for i in range(argument):
                     values_list.append([float(i)])
                 self._values = values_list
-                self.shape = (len(self.values),1)
+                self.shape = (len(self.values), 1)
                 self.__type = "COL"
-
-
 
         # initialize as a range
         elif isinstance(argument, tuple):
@@ -51,16 +43,15 @@ class Vector:
                     for i in range(argument[0], argument[1]):
                         values_list.append([float(i)])
                     self._values = values_list
-                    self.shape = (len(self.values),1)
+                    self.shape = (len(self.values), 1)
                     self.__type = "COL"
                 except:
                     raise ValueError(f"Imposible init vector with {argument}")
 
-                
     def treat_list_of_lists(self, argument):
         # it is a list of A list of floats
         # [[1.0, 2.0, 3.0, 4.0]]
-        # i check >= cause 
+        # i check >= cause
         # [[a]] is a valid row vector
         # [[a]] is a valid column vector
         values_list = []
@@ -81,7 +72,7 @@ class Vector:
             for num in argument:
                 if isinstance(num, list):
                     if len(num) == 1:
-                        if isinstance(num[0],str):
+                        if isinstance(num[0], str):
                             # [[1.0],["2.0"],[3.0],[4.0]]
                             # one list member contains string
                             raise ValueError(f"imposible create COL vector with {num}")
@@ -90,8 +81,8 @@ class Vector:
                     else:
                         # [[1.0],[2.0, 2.1],[3.0],[4.0]]
                         # a list member with more than one element
-                        raise ValueError(f"imposible create COL vector with {num}")    
-                else:  
+                        raise ValueError(f"imposible create COL vector with {num}")
+                else:
                     # [[ 1,0] , 2.0, [3.0]]
                     # one list member is not a list
                     raise ValueError(f"imposible create COL vector with {num}")
@@ -100,6 +91,15 @@ class Vector:
             self.__type = "COL"
 
     def T(self):
+        """
+        Transposes a vectors:
+        ROW CASE
+        [[0.0, ... , n.0]]  ==> [[0.0], ..., [n.0]]
+        (1, n) ==> (n, 1)
+        COL CASE
+        [[0.0], ..., [n.0]] ==> [[0.0, ... , n.0]]
+        (n, 1) ==> (1, n)
+        """
         thevalues = self.values.copy()
         values_list = []
         if self.__type == "ROW":
@@ -117,11 +117,13 @@ class Vector:
                 values_list.append(num[0])
             # transpoosed to a ROW
             self._values = [values_list]
-            self.shape = (1,len(values_list) )
+            self.shape = (1, len(values_list))
             self.__type = "ROW"
 
-
     def dot(self, obj):
+        """
+        Dot product vetween two vector of same dimension
+        """
         if self.shape == obj.shape:
             sum = 0
             if self.shape[0] == 1:
@@ -139,64 +141,85 @@ class Vector:
             raise ValueError(f"impossible dot product between {self.shape} \
                              and {obj.shape}")
 
-
-
     # __str__ & __repr__ must be identical, i.e we expect that print(vector)
     # and vector within python interpretor behave the same, see correspondi
     def __str__(self):
         return f"{self.__class__.__name__}({self.values})"
+
     def __repr__(self):
         return f"{self.__class__.__name__}({self.values})"
-    
-    
+
     # add & radd : only vectors of same shape.
-    
+
     def __add__(self, other):
-        if self.shape == other.shape:
-            result_list = []
-            if self.shape[0] == 1:
-                # both ROW vectors
-                # [[0.0, ... , n.0]] . [[0.0, ... , n.0]]
-                for idx in range(self.shape[1]):
-                    result_list.append(self.values[0][idx] + other.values[0][idx])
-                return Vector([result_list])
-            if self.shape[1] == 1:
-                # both COL vectors
-                # [[0.0], ..., [n.0]] . [[0.0], ..., [n.0]]
-                for idx in range(self.shape[0]):
-                    result_list.append([self.values[idx][0] + other.values[idx][0]])
-                return Vector(result_list)
+        """
+        Adds two vectors with same shape :vector + vector
+        x = [[0.0, 1.0, 2.0, 3.0]] + Vector(4)
+        here self holds  [[0.0, 1.0, 2.0, 3.0]] and other holds Vector(4)
+
+        """
+        if isinstance(other, Vector):
+            if self.shape == other.shape:
+                result_list = []
+                if self.shape[0] == 1:
+                    # both ROW vectors
+                    # [[0.0, ... , n.0]] . [[0.0, ... , n.0]]
+                    for idx in range(self.shape[1]):
+                        result_list.append(self.values[0][idx] + other.values[0][idx])
+                    return Vector([result_list])
+                if self.shape[1] == 1:
+                    # both COL vectors
+                    # [[0.0], ..., [n.0]] . [[0.0], ..., [n.0]]
+                    for idx in range(self.shape[0]):
+                        result_list.append([self.values[idx][0] + other.values[idx][0]])
+                    return Vector(result_list)
+            else:
+                raise ValueError(f"ADD:Shape {self.shape} is not compatible with {other.shape}")
         else:
-            raise ValueError(f"ADD:Shape {self.shape} is compatible with {other.shape}")
-   
+            raise ValueError(f"ADD:'{other}' is not a vector")
+
     def __radd__(self, other):
         return self.__add__(other, self)
 
     # sub & rsub: only vectors of same shape.
 
-    def __sub__(self, obj):
-        if self.shape == obj.shape:
-            result_list = []
-            if self.shape[0] == 1:
-                # both ROW vectors
-                # [[0.0, ... , n.0]] . [[0.0, ... , n.0]]
-                for idx in range(self.shape[1]):
-                    result_list.append(self.values[0][idx] - obj.values[0][idx])
-                return Vector([result_list])
-            if self.shape[1] == 1:
-                # both COL vectors
-                # [[0.0], ..., [n.0]] . [[0.0], ..., [n.0]]
-                for idx in range(self.shape[0]):
-                    result_list.append([self.values[idx][0] - obj.values[idx][0]])
-                return Vector(result_list)
+    def __sub__(self, other):
+        """
+        Substract two vectors with same shape :vector - vector
+        x = [[0.0, 1.0, 2.0, 3.0]] - Vector(4)
+        here self holds  [[0.0, 1.0, 2.0, 3.0]] and other holds Vector(4)
+
+        """
+        if isinstance(other, Vector):
+            if self.shape == other.shape:
+                result_list = []
+                if self.shape[0] == 1:
+                    # both ROW vectors
+                    # [[0.0, ... , n.0]] . [[0.0, ... , n.0]]
+                    for idx in range(self.shape[1]):
+                        result_list.append(self.values[0][idx] - other.values[0][idx])
+                    return Vector([result_list])
+                if self.shape[1] == 1:
+                    # both COL vectors
+                    # [[0.0], ..., [n.0]] . [[0.0], ..., [n.0]]
+                    for idx in range(self.shape[0]):
+                        result_list.append([self.values[idx][0] - other.values[idx][0]])
+                    return Vector(result_list)
+            else:
+                raise ValueError(f"SUB:Shape {self.shape} is compatible with {other.shape}")
         else:
-            raise ValueError(f"SUB:Shape {self.shape} is compatible with {obj.shape}")
-        
+            raise ValueError(f"SUB:'{other}' is not a vector")
+
     def __rsub__(other, self):
         return self.__sub__(other, self)
 
     # truediv : only with scalars (to perform division of Vector by a scalar).
     def __truediv__(self, other):
+        """
+        divide a vector / Scalar
+        x = Vector(4) / 5
+        here self holds the vector and other holds 5
+        """
         if isinstance(other, int) or isinstance(other, float):
             if other == 0:
                 raise ValueError(f"TRUEDIV: {other} is not a good divisor")
@@ -215,16 +238,31 @@ class Vector:
                 return Vector(result_list)
         else:
             raise ValueError(f"TRUEDIV: '{other}' is not an escalar to divide by")
-        
-    
+
     # rtruediv : raises an NotImplementedError with the message "Division of a scalar by a Vector is not defined here."
+
     def __rtruediv__(other, self):
-        raise NotImplementedError(f"RTRUEDIV:Division of a scalar {other} by a Vector is not defined here.")
+        """
+        divide an scalar * vector
+        x = 5 / Vector(4)
+        here self holds 5 and other holds the vector
+        """
+        if self is None:
+            raise ValueError(f"RTRUEDIV:Division of a {self} by a Vector is not possible")
+        else:
+            msg = f"RTRUEDIV:Division of a scalar {other} \
+                by a Vector is not defined here."
+            raise NotImplementedError(msg)
 
+    # mul & rmul: only SCALARS (multiplies Vectors and scalars).
 
-
-    # mul & rmul: only SCALARS (to perform multiplication of Vector by a scalar).
     def __mul__(self, other):
+        """
+        multiplies a vector * Scalar
+        x = Vector(4) * 5
+        here self holds the vector and other holds 5
+
+        """
         if isinstance(other, int) or isinstance(other, float):
             result_list = []
             if self.shape[0] == 1:
@@ -240,9 +278,15 @@ class Vector:
                     result_list.append([self.values[idx][0] * other])
                 return Vector(result_list)
         else:
-            raise ValueError(f"MUL: '{other}' is not an escalar to multiply by")
+            raise ValueError(f"MUL:'{other}' not escalar to multiply by")
 
     def __rmul__(other, self):
+        """
+        multiplies an scalar * vector
+        x = 5 * Vector(4)
+        here self holds 5 and other holds the vector
+
+        """
         if isinstance(self, int) or isinstance(self, float):
             result_list = []
             if other.shape[0] == 1:
@@ -258,15 +302,4 @@ class Vector:
                     result_list.append([other.values[idx][0] * self])
                 return Vector(result_list)
         else:
-                raise ValueError(f"RMUL: '{self}' is not an escalar to multiply by")
-
-
- 
-v1 = Vector(4)
-print(v1)
-v = v1 * 5
-print(v)
-v2 = 5 * v1
-print(v)
-v = v2 / 0
-print(v)
+            raise ValueError(f"RMUL:'{self}' not escalar to multiply by")
