@@ -28,7 +28,7 @@ and with enumerate in the enumerate_evaluate function
 class Evaluator:
     def __init__(self):
         pass
-
+    @staticmethod
     def zip_evaluate(coefs: list, words: list) -> int:
         """ multiplies the word's lenght times coef
         PARAM
@@ -49,7 +49,7 @@ class Evaluator:
             return sum([len(word) * coef for word, coef in zipped])
         else:
             return -1
-
+    @staticmethod
     def enumerate_evaluate(coefs: list, words: list) -> int:
         """ multiplies the word's lenght times coef
         PARAM
