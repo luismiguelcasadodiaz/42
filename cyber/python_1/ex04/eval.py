@@ -44,11 +44,9 @@ class Evaluator:
 
         if len(words) == len(coefs):
             zipped = zip(words, coefs)
-
-            # this list comprenhension convers a list of tuples
-            # into a list on numbers
-            weigthed = [len(word) * coef for word, coef in zipped]
-            return sum(weigthed)
+            # the list comprenhension convers a list of tuples [(w,c)..(w,c)]
+            # into a list on numbers, whose sum i return
+            return sum([len(word) * coef for word, coef in zipped])
         else:
             return -1
 
@@ -67,10 +65,7 @@ class Evaluator:
         # to access the relevant coef in the coefs list
 
         if len(words) == len(coefs):
-            result = 0
-            for index, word in enumerate(words):
-                result = result + len(word) * coefs[index]
-            return result
+            return sum([len(word) * coefs[index] for index, word in enumerate(words)])
         else:
             return -1
 
@@ -87,3 +82,4 @@ if __name__ == "__main__":
 
     print(f"Resultado del test 1 es {result1}")
     print(f"Resultado del test 2 es {result2}")
+    print(f"Resultado del test 3 es {result3}")
