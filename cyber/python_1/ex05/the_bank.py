@@ -17,7 +17,7 @@ class Account(object):
 
         # in case i was instantiated without value attribute
         # i self create such atribute and set it to zero
-        if not hasattr(self, ’value’):
+        if not hasattr(self, 'value'):
             self.value = 0
         if self.value < 0:
             raise AttributeError("Attribute value cannot be negative.")
@@ -47,38 +47,53 @@ class Bank(object):
         """
         # test if new_account is an Account() instance and if
         # it can be appended to the attribute accounts
-        if new_account not is none:
-            if isinstance(new_account, Account) and \
-                    self.account_to_add_ok(Account):
-                self.accounts.append(new_account)
-                return True
-            else:
-                return False
-        else:
-            msg = f"ADD:Account '{new_account}' is not a valid account"
+        if new_account is None:
+            # i got bank.add() wiht nothing to add
+            msg = f"ADD:Account '{new_account}' ==> invalid class"
             raise ValueError(msg)
+        else:
+            # check for the right objec  
+            if isinstance(new_account, Account):
+                # check for an exixting account
+                if account_to_add_ok(new_account):
+                    self.accounts.append(new_account)
+                else:
+                    msg = f"Bank already has An account for '{new_account.name}'"
+                    raise ValueError(msg)
+            else:
+                msg = f"ADD: {new_account} is an {type(new_account)} \
+                        instead of an account"
+                raise ValueError(msg)
 
-    def transfer(self, origin, dest, amount):
+    def transfer(self, orig, dest, amount):
         """" Perform the fund transfer
         @origin:  str(name) of the first account
         @dest:    str(name) of the destination account
         @amount:  float(amount) amount to transfer
         @return   True if success, False if an error occured
         """
-        # positive amount verification
 
-        if amount < 0:
-            msg = f"TRANSFER: incorrect amount '{amount}' for a transfer"
-            raise ValueError(msg)
+        # accounts validity
+        if not_corrupted_account(orig) and not_corrupted_account(dest):
 
-        # verification for Enough funds at origin
+            # positive amount verification
 
-        if amount > origin.value:
-            msg = f"TRANSFER: '{origin.name} has less than '{amount}'"
-            raise ValueError(msg)
+            if amount < 0:
+                msg = f"TRANSFER: incorrect amount '{amount}' for a transfer"
+                raise ValueError(msg)
 
-        # TODO: verificate that are not corropte accounts
-        # TODO: Treat the case of transfert between same Account
+            # verification for Enough funds at origin
+
+            if amount > origin.value:
+                msg = f"TRANSFER: '{orig.name} has less than '{amount}'"
+                raise ValueError(msg)
+
+            if orig.name == dest.name:
+                print(f"Transfert between same accout {dest.name}")
+        else:
+            # this is the case of a regular transfer.
+            orig.transfer(- amount)
+            dest.transfer(+ amount)
 
     def fix_account(self, name):
         """ fix account associated to name if corrupted
@@ -86,19 +101,12 @@ class Bank(object):
         @return  True if success, False if an error occured
         """
         # ... Your code ...
-    def account_to_add_ok(account):
+
+    def account_to_add_ok(acc):
         """
         checking if account's name already exist in the bank
-        TODO: Verify Account type
         """
-
-        accoun_exist = False
-        for a in self.accounts:
-            if account.name == a.name:
-                account_exist = True
-                break
-        if account_exist:
-            return False
+        return __account_exists(acc)
 
     def not_corrupted_account(acc):
         """
@@ -113,10 +121,20 @@ class Bank(object):
                 no_attr_n_i_v(acc) or \
                 name_no_str(acc) or \
                 id_not_int(acc) or \
-                value_not_int_or_float(acc):
+                __value_not_int_or_float(acc):
             return False
-        else:
-            return True
+        else: # As the account is corrupted ....
+            # if the account exist in the bank
+            if __account_exists(acc):
+                # I try to fix it
+                if fix_me(acc):
+                    # with sucess at fix_me ...
+                    # the account is not corrupted any more
+                    return False
+                else:
+                    # with fail at fix_me...
+                    # The account is still corrupted
+                    return True
 
     def event_num_atrributes(acc):
         """ """
@@ -223,10 +241,45 @@ class Bank(object):
             # Has not id, so id_not_int is true
             return True
 
-    def value_not_int_or_float(acc):
+    def __value_not_int_or_float(acc):
         if hasattr(acc, "value"):
             # isinstance is false when id  is not INT.So Corruptes is true
             return not isinstance(acc.id, (int | float))
         else:
             # Has not value, so value_not_int_or_float is true
             return True
+
+    def __account_exist(acc):
+        """ Looks for acc.name inside the Bank's list of accounts
+        """
+        acc_exist = False
+        for a in self.accounts:
+            if acc.name == a.name:
+                acc_exist = True
+                break
+        return acc_exist
+
+
+if __name__ == "__main__":
+    bank = Bank()
+    bank.add(Account(
+        'Smith Jane',
+        zip='911-745',
+        value=1000.0,
+        bref='1044618427ff2782f0bbece0abd05f31'
+    ))
+    bank.add(Account(
+        'William John',
+        zip='100-064',
+        value=6460.0,
+        ref='58ba2b9954cd278eda8a84147ca73c87',
+        info=None,
+        other='This is the vice president of the corporation'
+    ))
+
+    if bank.transfer('William John', 'Smith Jane', 545.0) is False:
+        print('Failed')
+    else:
+        print('Success')
+
+
