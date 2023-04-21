@@ -4,6 +4,7 @@ from book import Book
 import os
 import sys
 
+
 def add_recipe():
     name = input("Enter a name:").strip()
     print("Enter ingredients (one per line. Ctrl-D to end)")
@@ -16,6 +17,7 @@ def add_recipe():
     inst = input("Explain how to cook: ").strip()
     the_recipe = Recipe(name, level, time, ingredients, inst, meal)
     cookbook.add_recipe(the_recipe)
+
 
 # create a list of options to be displayes as a menu
 menu_options = ["Add a recipe", "Delete a recipe",
@@ -38,6 +40,7 @@ def read_recipe_level():
             print("A letter is not an option.")
     return option
 
+
 def read_cooking_time():
     correcto = False
     option = 0
@@ -53,6 +56,7 @@ def read_cooking_time():
             print("A letter is not a good preparation time.")
     return option
 
+
 def show_menu():
     os.system('clear')
     print("List of available option:")
@@ -67,7 +71,7 @@ def read_meal_type():
         if raw_option in ["starter", "lunch", "dessert"]:
             correcto = True
         else:
-             print(f"Incorrect meal type {raw_option} does not exist.")
+            print(f"Incorrect meal type {raw_option} does not exist.")
     return raw_option
 
 
@@ -102,10 +106,18 @@ def read_recipe_name():
 
 if __name__ == "__main__":
     cookbook = Book("Luis")
-    recipe1 = Recipe("tortilla", 3, 45, ["patatas", "huevos", "aceite", "sal"], "pelar, batir, mezclar freir", "lunch")
-    recipe2 = Recipe("sandwich", 2, 30, ["ham", "bread", "cheese", "tomatoes"], "cortar untar colocar", "lunch")
-    recipe3 = Recipe("cake", 4, 60, ["flour", "sugar", "eggs"], "mezclar todo", "dessert")
-    recipe4 = Recipe("salad",2, 15,  ["avocado", "arugula", "tomatoes", "spinach"],"Alinyar","lunch")
+    recipe1 = Recipe("tortilla", 3, 45,
+                     ["patatas", "huevos", "aceite", "sal"],
+                     "pelar, batir, mezclar freir", "lunch")
+    recipe2 = Recipe("sandwich", 2, 30,
+                     ["ham", "bread", "cheese", "tomatoes"],
+                     "cortar untar colocar", "lunch")
+    recipe3 = Recipe("cake", 4, 60,
+                     ["flour", "sugar", "eggs"],
+                     "mezclar todo", "dessert")
+    recipe4 = Recipe("salad", 2, 15,
+                     ["avocado", "arugula", "tomatoes", "spinach"],
+                     "Alinyar", "lunch")
     cookbook.add_recipe(recipe1)
     cookbook.add_recipe(recipe2)
     cookbook.add_recipe(recipe3)
