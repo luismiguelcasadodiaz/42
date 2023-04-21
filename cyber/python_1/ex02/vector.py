@@ -23,7 +23,8 @@ class Vector:
         # initialize as size
         elif isinstance(argument, int):
             if argument == 0:
-                raise ValueError(f"imposible init vector wiht {argument} elemens")
+                msg = f"imposible init vector wiht {argument} elemens"
+                raise ValueError(msg)
             else:
                 values_list = []
                 for i in range(argument):
@@ -45,7 +46,7 @@ class Vector:
                     self._values = values_list
                     self.shape = (len(self.values), 1)
                     self.__type = "COL"
-                except:
+                except Exception:
                     raise ValueError(f"Imposible init vector with {argument}")
 
     def treat_list_of_lists(self, argument):
@@ -60,7 +61,8 @@ class Vector:
                 if isinstance(num, str):
                     # [ 1.0, "a", 2.0]
                     # a non numeric list member
-                    raise ValueError(f"imposible create a ROW vector with string {num}")
+                    msg = f"imposible create a ROW vector with string {num}"
+                    raise ValueError(msg)
                 else:
                     values_list.append(float(num))
             self._values = [values_list]
@@ -75,13 +77,15 @@ class Vector:
                         if isinstance(num[0], str):
                             # [[1.0],["2.0"],[3.0],[4.0]]
                             # one list member contains string
-                            raise ValueError(f"imposible create COL vector with {num}")
+                            msg = f"imposible create COL vector with {num}"
+                            raise ValueError(msg)
                         else:
                             values_list.append(num)
                     else:
                         # [[1.0],[2.0, 2.1],[3.0],[4.0]]
                         # a list member with more than one element
-                        raise ValueError(f"imposible create COL vector with {num}")
+                        msg = f"imposible create COL vector with {num}"
+                        raise ValueError(msg)
                 else:
                     # [[ 1,0] , 2.0, [3.0]]
                     # one list member is not a list
@@ -165,16 +169,20 @@ class Vector:
                     # both ROW vectors
                     # [[0.0, ... , n.0]] . [[0.0, ... , n.0]]
                     for idx in range(self.shape[1]):
-                        result_list.append(self.values[0][idx] + other.values[0][idx])
+                        result_list.append(self.values[0][idx] +
+                                           other.values[0][idx])
                     return Vector([result_list])
                 if self.shape[1] == 1:
                     # both COL vectors
                     # [[0.0], ..., [n.0]] . [[0.0], ..., [n.0]]
                     for idx in range(self.shape[0]):
-                        result_list.append([self.values[idx][0] + other.values[idx][0]])
+                        result_list.append([self.values[idx][0] +
+                                            other.values[idx][0]])
                     return Vector(result_list)
             else:
-                raise ValueError(f"ADD:Shape {self.shape} is not compatible with {other.shape}")
+                msg = f"ADD:Shape {self.shape} is\
+                      not compatible with {other.shape}"
+                raise ValueError(msg)
         else:
             raise ValueError(f"ADD:'{other}' is not a vector")
 
@@ -197,16 +205,20 @@ class Vector:
                     # both ROW vectors
                     # [[0.0, ... , n.0]] . [[0.0, ... , n.0]]
                     for idx in range(self.shape[1]):
-                        result_list.append(self.values[0][idx] - other.values[0][idx])
+                        result_list.append(self.values[0][idx] -
+                                           other.values[0][idx])
                     return Vector([result_list])
                 if self.shape[1] == 1:
                     # both COL vectors
                     # [[0.0], ..., [n.0]] . [[0.0], ..., [n.0]]
                     for idx in range(self.shape[0]):
-                        result_list.append([self.values[idx][0] - other.values[idx][0]])
+                        result_list.append([self.values[idx][0] -
+                                            other.values[idx][0]])
                     return Vector(result_list)
             else:
-                raise ValueError(f"SUB:Shape {self.shape} is compatible with {other.shape}")
+                msg = f"SUB:Shape {self.shape} is\
+                     compatible with {other.shape}"
+                raise ValueError(msg)
         else:
             raise ValueError(f"SUB:'{other}' is not a vector")
 
@@ -237,9 +249,12 @@ class Vector:
                     result_list.append([self.values[idx][0] / other])
                 return Vector(result_list)
         else:
-            raise ValueError(f"TRUEDIV: '{other}' is not an escalar to divide by")
+            msg = f"TRUEDIV: '{other}' \
+                   is not an escalar to divide by"
+            raise ValueError(msg)
 
-    # rtruediv : raises an NotImplementedError with the message "Division of a scalar by a Vector is not defined here."
+    # rtruediv : raises NotImplementedError with the message
+    # "Division of a scalar by a Vector is not defined here."
 
     def __rtruediv__(other, self):
         """
@@ -248,7 +263,9 @@ class Vector:
         here self holds 5 and other holds the vector
         """
         if self is None:
-            raise ValueError(f"RTRUEDIV:Division of a {self} by a Vector is not possible")
+            msg = f"RTRUEDIV:Division of a {self} \
+                    by a Vector is not possible"
+            raise ValueError(msg)
         else:
             msg = f"RTRUEDIV:Division of a scalar {other} \
                 by a Vector is not defined here."
