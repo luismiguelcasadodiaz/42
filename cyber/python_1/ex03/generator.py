@@ -117,9 +117,12 @@ if __name__ == "__main__":
         print(word)
 
     print("-" * 75)
-    txt="This is a simple string for a basic test. Very simple." 
+    txt = "This is a simple string for a basic test. Very simple."
     for elem in generator(txt, sep=' '):
         print(elem)
-    for elem in generator(txt, sep='.'): print(elem)
-    for elem in generator(txt, sep='i'): print(elem)
-    for elem in generator(txt, sep='si'): print(elem)
+    for elem in generator(txt, sep='.'):
+        print(elem)
+    for elem in generator(txt, sep='i'):
+        print(elem)
+    for elem in generator(txt, sep='si'):
+        print(elem)
