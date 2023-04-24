@@ -36,7 +36,10 @@ import myfunctions
 MIN_LEVEL_RECUR = 1
 MAX_LEVEL_RECUR = 5
 
-def uniform_resource_locator(url_txt):  
+def uniform_resource_locator(url_txt):
+  """
+    helper function that validates url passed at command line
+  """
   ok_url = validators.url(url_txt)
   if not ok_url:
     parser.error("Invalid url")
@@ -45,6 +48,9 @@ def uniform_resource_locator(url_txt):
   
 
 def recursion_level(argument):
+  """
+    helper function that recursion level passed at command line
+  """
   int_arg = int(argument)
   if MIN_LEVEL_RECUR <= int_arg and int_arg <= MAX_LEVEL_RECUR:
     return int_arg
@@ -65,7 +71,8 @@ parser.add_argument('--recursive','-r',
 parser.add_argument('--level','-l', 
                     help=f'Nivel máximo de la descarga recursiva. \
                       {MAX_LEVEL_RECUR} niveles por defecto.',
-                    type=recursion_level)
+                    type=recursion_level,
+                    default = 5)
 
 parser.add_argument( '--path','-p',
                     help='Ruta para guardar las imágenes.',
@@ -79,8 +86,8 @@ parser.add_argument('url',
 
 #args = parser.parse_args(['-p','~/','https://www.eldebate.com/'])
 
-#args = parser.parse_args(['-r','-l','https://www.eldebate.com/'])
-args = parser.parse_args(['https://www.eldebate.com/'])
+args = parser.parse_args(['-r','https://www.eldebate.com/'])
+#args = parser.parse_args(['https://www.eldebate.com/'])
 
 cwd = os.getcwd()
 spiderpath = os.path.join(cwd, args.path)
@@ -89,8 +96,8 @@ spiderpath = os.path.join(cwd, args.path)
 
 if not args.recursive:
   if args.level is None:
-    myfunctions.no_recursive(args.url[0], spiderpath)
+    myfunctions.img_scrapper(args.url[0], spiderpath,args.recursive)
   else:
     parser.error("recursitivy level incorrect when no recursivity required")
 else:
-myfunctions.recursive(args.url[0], spiderpath, args.level)
+  myfunctions.img_scrapper(args.url[0], spiderpath, args.recursive, args.level)
