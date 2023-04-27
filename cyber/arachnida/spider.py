@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 """
 Created on Sat Apr 15 06:11:12 2023
 
@@ -30,6 +30,7 @@ import argparse       # helper to analise command line arguments
 import pathlib
 import validators
 import os
+import sys
 from pprint import pprint
 
 import requests
@@ -395,32 +396,50 @@ def img_scrapper(url, path: str, recursive: bool, level=5):
   for image in images:
     print(image)
 """
+if __name__ == '__main__':
+  # create cli arguments parser
+  parser = create_argument_parser()
+  # analize arguments
+  pprint(sys.argv)
+  
+  try:
+    args = parser.parse_args(sys.argv[1:])
+  except:
+    args = parser.parse_args(['https://www.eldebate.com'])
+  """
+  #args = parser.parse_args(['-p','~/','https://www.eldebate.com/'])
 
-parser = create_argument_parser()
-#args = parser.parse_args(['-p','~/','https://www.eldebate.com/'])
+  args = parser.parse_args(['https://realpython.github.io/fake-jobs/'])
+  args = parser.parse_args(['https://www.eldebate.com'])
 
-args = parser.parse_args(['https://realpython.github.io/fake-jobs/'])
-args = parser.parse_args(['https://www.eldebate.com'])
+  #args = parser.parse_args(['https://www.eldebate.com/'])
+  """
+  # check if folder for images exists
+  
+  cwd = os.getcwd()
+  spiderpath = os.path.join(cwd, args.path)
+  try:
+    if not os.path.isdir(spiderpath): # spider path does not exist
+      os.makedirs(spiderpath)         # then I create it
+    else:                             # spider pathfolder exist
+      if not os.access(spiderpath, os.W_OK):  
+        msg = f"Write permission denegated at {spiderpath}"
+        raise ValueError(msg)
+  except ValueError:
+    print(msg)      
 
-#args = parser.parse_args(['https://www.eldebate.com/'])
-
-cwd = os.getcwd()
-spiderpath = os.path.join(cwd, args.path)
-if not os.path.isdir(spiderpath): # spider path does not exist
-  os.makedirs(spiderpath)         # then I create it
-
-#Detectar si tengo permiso de escribir en ese directorio
-os.system('clear')
-if not args.recursive:
-  if args.level is None:
-    links_to_images_d=img_scrapper(args.url[0], spiderpath,args.recursive)
+  #Detectar si tengo permiso de escribir en ese directorio
+  os.system('clear')
+  if not args.recursive:
+    if args.level is None:
+      links_to_images_d=img_scrapper(args.url[0], spiderpath,args.recursive)
+    else:
+      parser.error(f"recursitivy level {args.level} incorrect when no recursivity required")
   else:
-    parser.error(f"recursitivy level {args.level} incorrect when no recursivity required")
-else:
-  if args.level is None:
-    links_to_images_d = img_scrapper(args.url[0], spiderpath, args.recursive, MAX_LEVEL_RECUR )
-  else:
-    links_to_images_d = img_scrapper(args.url[0], spiderpath, args.recursive, args.level )
+    if args.level is None:
+      links_to_images_d = img_scrapper(args.url[0], spiderpath, args.recursive, MAX_LEVEL_RECUR )
+    else:
+      links_to_images_d = img_scrapper(args.url[0], spiderpath, args.recursive, args.level )
 
 print("He encontrado ",len(links_to_images_d))
 #pprint(links_to_images_d)
