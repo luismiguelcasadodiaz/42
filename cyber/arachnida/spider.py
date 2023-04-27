@@ -40,6 +40,8 @@ from urllib.error import HTTPError, URLError
 import re
 from bs4 import BeautifulSoup
 
+from loading import ft_progress
+
 
 
 MIN_LEVEL_RECUR  = 1
@@ -205,6 +207,40 @@ class Html_page():
       self._scheme = None
   
   @property
+  def ins_img_d(self):
+    return self._ins_img_d
+  @ins_img_d.setter
+  def ins_img_d(self, an_url):
+    if hasattr(self, '_ins_img_d'):
+      if an_url in self._ins_img_d:
+        self._ins_img_d[an_url][self.NUM_TIMES_FOUND] += 1  # as it exist add 1 to num times
+      else:
+        self._ins_img_d[an_url] = [1, False]
+        self.num_images = self.num_images + 1
+    else:
+      setattr(self, '_ins_img_d', {})
+
+  @property
+  def ins_link_d(self):
+    if '_ins_link_d' not in self.__dict__:
+      pass
+    else:
+      return self._ins_link_d
+  
+  @ins_link_d.setter
+  def ins_link_d(self, an_url):
+    if hasattr(self, '_ins_link_d'):
+      if self._ins_link_d is None:
+        pass
+      if an_url in self._ins_link_d:   # link found previously
+        self._ins_link_d[an_url][self.NUM_TIMES_FOUND] += 1  # as it exist add 1 to num times
+      else:  # new link
+        self._ins_link_d[an_url] = [1, False]
+        self.num_links = self.num_links + 1
+    else:
+      setattr(self, '_ins_link_d', {})
+
+  @property
   def char_set(self):
     return self._char_set
   @char_set.setter
@@ -228,7 +264,11 @@ class Html_page():
         self.authority = parsed_url.netloc  #  check if new link belong to.
         tested_url = My_url(an_url)         # opens the url and gets de body
         self.char_set = tested_url.char_set
+        self.ins_link_d = an_url            # link inserted in the instance dictionary
         self._html = tested_url.body
+        self.ins_link_d[an_url] = [1,True]  # set the link as visited
+
+        
         
       else:
         # TODO: html is in a local file
@@ -243,11 +283,8 @@ class Html_page():
     soup = BeautifulSoup(self.html, 'html.parser',from_encoding = self.char_set)
     for link in soup.find_all('img'):
       an_url = link.get('src')
-      if an_url in self.ins_img_d:
-        self.ins_img_d[an_url][self.NUM_TIMES_FOUND] += 1  # as it exist add 1 to num times
-      else:
-        self.ins_img_d[an_url] = [1, False]
-        self.num_images = self.num_images + 1        
+      self.ins_img_d = an_url
+      
       #print(an_url)
 
   def find_links_in_url(self):
@@ -258,11 +295,7 @@ class Html_page():
       an_url = link.get('href')
       parsed_url = urlparse(an_url)
       if parsed_url.netloc == self.authority: # it is a link to my domain
-        if an_url in self.ins_link_d:   # link found previously
-          self.ins_link_d[an_url][self.NUM_TIMES_FOUND] += 1  # as it exist add 1 to num times
-        else:  # new link
-          self.ins_link_d[an_url] = [1, False]
-          self.num_links = self.num_links + 1
+        self.ins_link_d = an_url
       else:
         pass   # i do nothing wiht links not belonging to my domain
 
@@ -276,14 +309,19 @@ class Html_page():
         self.link_dict[k][0] = True   ==> VISITED
         self.link_dict[k][1] = False  ==> NOT VISITED
     """
+    filtered_d = {}
+    for k, v in self.ins_link_d.items():
+      if not self.ins_link_d[k][1]:
+        filtered_d[k]= v
     
-    return [self.ins_link_d[k]
-            for k, v in self.ins_link_d.items() if not self.ins_link_d[k][1]]
+    return filtered_d
+  
+    
   @classmethod
-  def update_link_dict(cls, self):
-    for k,v in self.ins_link_d.items():
-      if k not in cls.cls_link_d:
-        cls.cls_link_d[k]= self.ins_link_d[k]
+  def update_link_dict(self):
+    for link in self.ins_link_d:
+      if link not in cls.cls_link_d:
+        cls.cls_link_d[link]= self.ins_link_d[link]
     
 class My_url():
   """ This class converts an url into a url body
@@ -343,11 +381,12 @@ def img_scrapper(url, path: str, recursive: bool, level=5):
     page.find_images_in_url()
     page.find_links_in_url()
     not_visited_links = page.filter_links()
+    links_to_images_d = {}
     for link in not_visited_links:
 
-      this_link_images = img_scrapper(url, path, recursive, level - 1)
-    #  image_urls.update(this_link_images)
-    #return image_urls
+      dict_with_images = img_scrapper(link, path, recursive, level - 1)
+      links_to_images_d.update(dict_with_images)
+    return links_to_images_d
 
 """
   pat_img =r'<img alt=\"(.*)\" data-full'      #El Mundo
@@ -360,21 +399,42 @@ def img_scrapper(url, path: str, recursive: bool, level=5):
 parser = create_argument_parser()
 #args = parser.parse_args(['-p','~/','https://www.eldebate.com/'])
 
-args = parser.parse_args(['-r','-l', '3','https://realpython.github.io/fake-jobs/'])
+args = parser.parse_args(['https://realpython.github.io/fake-jobs/'])
+args = parser.parse_args(['https://www.eldebate.com'])
+
 #args = parser.parse_args(['https://www.eldebate.com/'])
 
 cwd = os.getcwd()
 spiderpath = os.path.join(cwd, args.path)
+if not os.path.isdir(spiderpath): # spider path does not exist
+  os.makedirs(spiderpath)         # then I create it
 
 #Detectar si tengo permiso de escribir en ese directorio
 os.system('clear')
 if not args.recursive:
   if args.level is None:
-    img_scrapper(args.url[0], spiderpath,args.recursive)
+    links_to_images_d=img_scrapper(args.url[0], spiderpath,args.recursive)
   else:
     parser.error(f"recursitivy level {args.level} incorrect when no recursivity required")
 else:
   if args.level is None:
-    img_scrapper(args.url[0], spiderpath, args.recursive, MAX_LEVEL_RECUR )
+    links_to_images_d = img_scrapper(args.url[0], spiderpath, args.recursive, MAX_LEVEL_RECUR )
   else:
-    img_scrapper(args.url[0], spiderpath, args.recursive, args.level )
+    links_to_images_d = img_scrapper(args.url[0], spiderpath, args.recursive, args.level )
+
+print("He encontrado ",len(links_to_images_d))
+#pprint(links_to_images_d)
+
+image_counter = 0
+# calcule to know length of counter, for zero left padding
+image_counter_lenght = len(str(len(links_to_images_d)))
+for url in ft_progress(list(links_to_images_d.keys())):
+  if url is not None:
+    image_num = f"{image_counter:0>{image_counter_lenght}}_"
+    image_counter = image_counter + 1
+    print(image_counter)
+    image_file_name = image_num + url[url.rfind('/') + 1 :]  #  00nn_image_name
+    img_data = requests.get(url).content
+    image_path = os.path.join(spiderpath, image_file_name)
+    with open(image_path, 'wb') as handler:
+        handler.write(img_data)
