@@ -35,8 +35,8 @@ class LMCD_logger():
 
     def write_log(self, msg):
 
-        chunk0 = time.strftime("%Y-%m-%d %H:%M:%-S - ",
-                               time.gmtime(time.time()))
+        chunk0 = time.strftime("%Y-%m-%d.%f %H:%M:%-S - ",
+                               time.gmtime(time.perf_counter()))
         msg = chunk0 + f"({self.__username})" + msg
         with open(self.__log_file_path, 'a') as f:
             f.write(msg)
