@@ -23,7 +23,7 @@ ALLOWED_IMG_EXTE = tuple([".jpg", ".JPG", ".jpeg", ".JPEG", ".png",
 
 
 def options():
-    parser = argparse.ArgumentParser(description="Scorpion Reads
+    parser = argparse.ArgumentParser(description="Scorpion Reads\
                                      image metadata")
     parser.add_argument("file", help="Input image file.", nargs='+')
     args = parser.parse_args()
@@ -41,15 +41,14 @@ if __name__ == '__main__':
         # print("==>",file, extension)
         if extension not in ALLOWED_IMG_EXTE:
             print(f"File format {extension} not supported")
-            print(f"I am ready only for
-                  {[x for idx, x in enumerate(ALLOWED_IMG_EXTE)
-                   if (idx % 2) == 0]}")
+            m = [x for idx, x in enumerate(ALLOWED_IMG_EXTE) if idx % 2 == 0]
+            print(f"I am ready only for {m}")
             exit()
         scorpiopath = os.path.join(cwd, file)
         with open(scorpiopath, 'rb') as image_file:
             my_image = exifread.process_file(image_file)
             tags = my_image.keys()
-            if len(tags) == 0:  # this imaga has not EXIF data
+            if len(tags) == 0:  # this image has not EXIF data
                 print(f"No metadata in {scorpiopath}")
             else:
                 print()
