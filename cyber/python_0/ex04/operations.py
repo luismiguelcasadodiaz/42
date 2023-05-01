@@ -16,10 +16,10 @@ Remainder:   A%B
     print an error message instead of a numerical result.
 
 """
-
+import LMCD_decorators
 import sys
 
-
+@LMCD_decorators.debug
 def operate(a: int, b: int):
     print("Sum:         {}".format(a + b))
     print("Difference:  {}".format(a - b))
