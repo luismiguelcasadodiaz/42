@@ -45,7 +45,7 @@ from bs4 import BeautifulSoup
 from loading import ft_progress
 
 import validators
-from lmcd_decorators import debug
+
 
 
 MIN_LEVEL_RECUR = 1
@@ -280,8 +280,8 @@ class Html_page():
                 # TODO: html is in a local file
                 pass
         else:
-            msg = f"Html_page:Scheme '{parsed_url.scheme}'\
-                   from url {an_url} not allowed"
+            msg = f"Html_page:Scheme '{parsed_url.scheme}'"
+            msg = msg + " from url {an_url} not allowed"
             raise ValueError(msg)
 
     def find_right_attributes(self, link):
@@ -298,7 +298,7 @@ class Html_page():
         return my_set
 
     def find_images_in_url(self):
-        print(f"searching images -{self.url}-")
+        # print(f"searching images -{self.url}-")
         soup = BeautifulSoup(self.html, 'html.parser',
                              from_encoding=self.char_set)
         for link in soup.find_all('img'):
@@ -317,7 +317,10 @@ class Html_page():
         for link in links:
             an_url = link.get('href')
             parsed_url = urlparse(an_url)
-            if parsed_url.netloc == self.authority:  # link IN my domain
+            if parsed_url.netloc in self.authority:  # link IN my domain
+                # first try was parsed_url.netloc == self.authority
+                # as 'elpais.com' was != 'www.elpais.com'
+                # i changed it to parsed_url.netloc in self.authority
                 self.ins_link_d = an_url
             else:
                 pass   # i do nothing wiht links not belonging to my domain
@@ -396,7 +399,7 @@ class My_url():
         except TimeoutError:
             print("Request timed out")
 
-@debug
+
 def img_scrapper(url, path: str, recursive: bool, level=5):
     """
     Parameters:
@@ -416,6 +419,7 @@ def img_scrapper(url, path: str, recursive: bool, level=5):
         return page.ins_img_d
     if recursive:
         if level > 0:
+            parsed_url = urlparse(url)
             page = Html_page(url)
             # pprint(page.html)
             page.find_images_in_url()
@@ -425,9 +429,15 @@ def img_scrapper(url, path: str, recursive: bool, level=5):
             print(f"pending of visit {len(not_visited_links)}")
             links_to_images_d = {}
             for link in not_visited_links:
+                parsed_l = urlparse(link)
+                if parsed_l.netloc == '':
+                    parsed_l = parsed_l._replace(netloc=parsed_url.netloc)
+                if parsed_l.scheme == '':
+                    parsed_l = parsed_l._replace(scheme=parsed_url.scheme)
+                if parsed_l.scheme in ALLOWED_SCHEMES:
+                    dict_with_images = img_scrapper(parsed_l.geturl(), path, recursive, level - 1)
+                    links_to_images_d.update(dict_with_images)
 
-                dict_with_images = img_scrapper(link, path, recursive, level - 1)
-                links_to_images_d.update(dict_with_images)
             return links_to_images_d
         else:
             page = Html_page(url)
@@ -447,7 +457,8 @@ if __name__ == '__main__':
         args = parser.parse_args(sys.argv[1:])
     except:
         #args = parser.parse_args(['https://www.elpais.com/'])
-        args = parser.parse_args(['--recursive', '--level',  '2', 'https://www.elpais.com/'])
+        args = parser.parse_args(['--recursive', '--level',  '1', 'https://www.elmundo.es/'])
+        #args = parser.parse_args(['--recursive', '--level',  '1', 'https://www.elpais.com/'])
         #args = parser.parse_args(['--recursive', '--level',  '1', 'https://www.eldebate.com'])
         print("intente nuevamente")
     """
@@ -496,15 +507,31 @@ if __name__ == '__main__':
     image_counter = 0
     # calcule to know length of counter, for zero left padding
     image_counter_lenght = len(str(len(links_to_images_d)))
+    site = urlparse(args.url[0])
+    img_duplication_control = {}  #dict to avoid download repeated img
+    duplicated = 0  # counter of duplicated image
     for url in ft_progress(list(links_to_images_d.keys())):
         if url is not None:
             image_num = f"{image_counter:0>{image_counter_lenght}}_"
             image_counter = image_counter + 1
+            parsed_l = urlparse(url)
+            if parsed_l.netloc == '':
+                parsed_l = parsed_l._replace(netloc=site.netloc)
+            if parsed_l.scheme == '':
+                parsed_l = parsed_l._replace(scheme=site.scheme)
+            
             # print(image_counter)
             # 00nn_image_name
-            image_file_name = image_num + url[url.rfind('/') + 1:]
-            img_data = requests.get(url).content
-            image_path = os.path.join(spiderpath, image_file_name)
-            with open(image_path, 'wb') as handler:
-                handler.write(img_data)
+            image_name_in_url = url[url.rfind('/') + 1:]
+            if image_name_in_url not in img_duplication_control:
+                img_duplication_control[image_name_in_url] = True
+                image_file_name = image_num + image_name_in_url
+                img_data = requests.get(parsed_l.geturl()).content
+                image_path = os.path.join(spiderpath, image_file_name)
+                with open(image_path, 'wb') as handler:
+                    handler.write(img_data)
+            else:
+                duplicated = duplicated + 1
     print(f"Descarga de imagenes en {spiderpath} finalizada.")
+    print(f"He descargado {image_counter} images.")
+    print(f"Encontre {duplicated} duplicadas que no descargue")
