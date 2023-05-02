@@ -54,9 +54,11 @@ ALLOWED_SCHEMES = ['https', 'http', 'file']
 # IANA schemes include http, https, ftp, mailto, file, data and irc
 WEB_SCHEMES = ['https', 'http']
 LOCAL_SCHEMES = ['file']
-ALLOWED_CHARSETS = ['utf-8"', 'ISO-Latin-1', 'latin-1', 'iso-8859-1']
-ALLOWED_IMG_EXTE = tuple([".jpg", ".JPG", ".jpeg", ".JPEG", ".png",
-                          ".PNG", ".gif", ".GIF", ".bmp", ".BMP"])
+ALLOWED_CHARSETS = ['utf-8', 'ISO-Latin-1', 'latin-1', 'iso-8859-1', 'iso-8859-15']
+ALLOWED_IMG_EXTE = tuple([".jpg", ".JPG", ".jpeg", ".JPEG",
+                          ".png", ".PNG", ".gif", ".GIF",
+                          ".bmp", ".BMP", ".pdf", ".PDF",
+                          ".docx", ".DOCX"])
 
 
 def create_argument_parser():
@@ -69,15 +71,22 @@ def create_argument_parser():
         parsed_url = urlparse(url_txt)
         # 2.- check if scheme is allowed in this app
         if parsed_url.scheme in ALLOWED_SCHEMES:
-            # validators does not accept other schemes than http
-            fake_url = "https://" + parsed_url.netloc
-            # 3.- check if netloc/domain/autohity i ok
-            ok_url = validators.url(fake_url)
-            if not ok_url:
-                parser.error("Invalid url {url_txt}")
+            if parsed_url.scheme in WEB_SCHEMES:
+                # validators does not accept other schemes than http
+                fake_url = "https://" + parsed_url.netloc
+                # 3.- check if netloc/domain/autohity i ok
+                ok_url = validators.url(fake_url)
+                if not ok_url:
+                    parser.error(f"Invalid WEB url {url_txt}")
+                else:
+                    # 4.- returns ALLOWED SCHEME and valid Authuority
+                    return url_txt
             else:
-                # 4.- returns ALLOWED SCHEME and valid Authuority
-                return url_txt
+                # we face a file path
+                if os.path.isfile(parsed_url.path):
+                    return url_txt
+                else:
+                    parser.error(f"Invalid PATH {url_txt}")
 
         else:
             # passed scheme is not allowed
@@ -254,6 +263,7 @@ class Html_page():
         if text in ALLOWED_CHARSETS:
             self._char_set = text
         else:
+            # print(f"Charset {text} no ha sido considerado")
             self._char_set = None
 
     @property
@@ -263,6 +273,7 @@ class Html_page():
     @html.setter
     def html(self, an_url):
         parsed_url = urlparse(an_url)
+        print("tratamos esto", parsed_url)
         if parsed_url.scheme in ALLOWED_SCHEMES:
             if parsed_url.scheme in WEB_SCHEMES:
                 self.scheme = parsed_url.scheme
@@ -278,7 +289,16 @@ class Html_page():
                 self.cls_link_d[an_url] = [1, True]  # set link as visited
             else:
                 # TODO: html is in a local file
-                pass
+                self.scheme = parsed_url.scheme
+                tested_path=My_url(parsed_url.path)
+                self._html = tested_path.body
+                self.char_set = tested_path.char_set
+                self.scheme = tested_path.scheme
+                self.authority = tested_path.authority
+                # link inserted in the instance dictionary
+                self.ins_link_d = an_url
+                self.ins_link_d[an_url] = [1, True]  # set link as visited
+                self.cls_link_d[an_url] = [1, True]  # set link as visited
         else:
             msg = f"Html_page:Scheme '{parsed_url.scheme}'"
             msg = msg + " from url {an_url} not allowed"
@@ -316,14 +336,17 @@ class Html_page():
         print(f"Found {len(links)} links in -{self.url}-")
         for link in links:
             an_url = link.get('href')
-            parsed_url = urlparse(an_url)
-            if parsed_url.netloc in self.authority:  # link IN my domain
-                # first try was parsed_url.netloc == self.authority
-                # as 'elpais.com' was != 'www.elpais.com'
-                # i changed it to parsed_url.netloc in self.authority
-                self.ins_link_d = an_url
+            if an_url is not None:
+                parsed_url = urlparse(an_url)
+                if parsed_url.netloc in self.authority:  # link IN my domain
+                    # first try was parsed_url.netloc == self.authority
+                    # as 'elpais.com' was != 'www.elpais.com'
+                    # i changed it to parsed_url.netloc in self.authority
+                    self.ins_link_d = an_url
+                else:
+                    pass   # i do nothing wiht links not belonging to my domain
             else:
-                pass   # i do nothing wiht links not belonging to my domain
+                pass   # do nothing when a linsk has not href
 
     def filter_links(self):
         """
@@ -375,8 +398,26 @@ class My_url():
         self.status = None
         self.body = None
         self.char_set = None
+        self.scheme = None
+        self.authority = None
 
-        self.get_body()
+        if os.path.isfile(url):
+            self.get_file_content()
+        else:
+            self.get_body()
+
+    def get_file_content(self):
+        with open(self.url, 'r') as f:
+            content = f.readlines()
+        self.body = "".join(content).strip()
+        self.char_set = 'utf-8'
+        soup = BeautifulSoup(self.body, 'html.parser', from_encoding='utf-8')
+        file_canonical =""
+        for i in soup.select('link[rel*=canonical]'):
+            file_canonical =i['href']
+        parsed_file_canonical = urlparse(file_canonical)
+        self.scheme = parsed_file_canonical.scheme
+        self.authority = parsed_file_canonical.netloc
 
     def get_body(self):
         """
@@ -389,7 +430,12 @@ class My_url():
 
             if self.status == 200:
                 self.char_set = response.headers.get_content_charset()
-                self.body = body.decode()
+                try:
+                    self.body = body.decode(self.char_set)
+                except UnicodeDecodeError:
+                    self.body = " "
+                except TypeError:
+                    self.body = " "
             else:
                 return None
         except HTTPError as error:
@@ -431,9 +477,23 @@ def img_scrapper(url, path: str, recursive: bool, level=5):
             for link in not_visited_links:
                 parsed_l = urlparse(link)
                 if parsed_l.netloc == '':
-                    parsed_l = parsed_l._replace(netloc=parsed_url.netloc)
+                    # treat relative url found in this page
+                    # i add the autoroty from this page before scraping it
+                    if parsed_url.scheme == 'file':
+                        # this is the case that i find a relative web URL
+                        # inside an html read from file
+                        # i got autority from the canonical url at open
+                        parsed_l = parsed_l._replace(netloc=page.authority)
+                    else:
+                        parsed_l = parsed_l._replace(netloc=parsed_url.netloc)
                 if parsed_l.scheme == '':
-                    parsed_l = parsed_l._replace(scheme=parsed_url.scheme)
+                    # this is the case when the link has not scheme
+                    if parsed_url.scheme == 'file':
+                        # if the link belong to an htmel read form file
+                        # i got scheme from the caninical
+                        parsed_l = parsed_l._replace(scheme=page.scheme)
+                    else:
+                        parsed_l = parsed_l._replace(scheme=parsed_url.scheme)
                 if parsed_l.scheme in ALLOWED_SCHEMES:
                     dict_with_images = img_scrapper(parsed_l.geturl(), path, recursive, level - 1)
                     links_to_images_d.update(dict_with_images)
@@ -451,17 +511,20 @@ if __name__ == '__main__':
     parser = create_argument_parser()
     # analize arguments
     pprint(sys.argv)
-    #args = parser.parse_args(sys.argv[1:])
+    args = parser.parse_args(sys.argv[1:])
+    #args = parser.parse_args(['--recursive', '--level',  '1', 'file:/Users/lcasado-/Documents/42/cyber/arachnida/eldebate.html'])
+    #args = parser.parse_args(['--recursive', '--level',  '1', 'https://www.iese.edu/'])
     
+    """
     try:
         args = parser.parse_args(sys.argv[1:])
     except:
         #args = parser.parse_args(['https://www.elpais.com/'])
-        args = parser.parse_args(['--recursive', '--level',  '1', 'https://www.elmundo.es/'])
+        #args = parser.parse_args(['--recursive', '--level',  '1', 'https://www.elmundo.es/'])
         #args = parser.parse_args(['--recursive', '--level',  '1', 'https://www.elpais.com/'])
         #args = parser.parse_args(['--recursive', '--level',  '1', 'https://www.eldebate.com'])
         print("intente nuevamente")
-    """
+    
     #args = parser.parse_args(['-p','~/','https://www.eldebate.com/'])
 
     args = parser.parse_args(['https://realpython.github.io/fake-jobs/'])
