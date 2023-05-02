@@ -18,8 +18,10 @@ import pprint
 import sys
 import os
 
-ALLOWED_IMG_EXTE = tuple([".jpg", ".JPG", ".jpeg", ".JPEG", ".png",
-                          ".PNG", ".gif", ".GIF", ".bmp", ".BMP"])
+ALLOWED_IMG_EXTE = tuple([".jpg", ".JPG", ".jpeg", ".JPEG",
+                          ".png", ".PNG", ".gif", ".GIF",
+                          ".bmp", ".BMP", ".pdf", ".PDF",
+                          ".docx", ".DOCX"])
 
 
 def options():
