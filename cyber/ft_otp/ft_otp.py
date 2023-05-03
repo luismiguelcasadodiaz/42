@@ -1,40 +1,36 @@
-#!/usr/bin/python3
+#!/Users/lcasado-/miniconda3/envs/42AI-lcasado-/bin/python
 
 import os
 import sys
+import argparse
+import OpenSSL
+import pprint
 
 def create_argument_parser():
 
-    def uniform_resource_locator(url_txt):
+    def correct_length(file):
         """
-          helper function that validates url passed at command line
+          helper function that if Hexadecimal key is longer than 64
         """
-        # 1.- urlparse splits componenst
-        parsed_url = urlparse(url_txt)
-        # 2.- check if scheme is allowed in this app
-        if parsed_url.scheme in ALLOWED_SCHEMES:
-            if parsed_url.scheme in WEB_SCHEMES:
-                # validators does not accept other schemes than http
-                fake_url = "https://" + parsed_url.netloc
-                # 3.- check if netloc/domain/autohity i ok
-                ok_url = validators.url(fake_url)
-                if not ok_url:
-                    parser.error(f"Invalid WEB url {url_txt}")
+        # 1.- check if key exist
+        cwd = os.getcwd()
+        pathfile = os.path.join(cwd, file)
+        if os.path.isfile(pathfile):
+            # 2.- check if i ca read the key 
+            if os.access(pathfile, os.R_OK):
+                # 3.- read the file and check length
+                with open(pathfile, 'rb') as f:
+                    text = f.read()
+                # 4.- if length is ok y return the key
+                if len(text) >=64:
+                    del text
+                    return pathfile
                 else:
-                    # 4.- returns ALLOWED SCHEME and valid Authuority
-                    return url_txt
+                    parser.error("Key smaller than 64")
             else:
-                # we face a file path
-                if os.path.isfile(parsed_url.path):
-                    return url_txt
-                else:
-                    parser.error(f"Invalid PATH {url_txt}")
-
+                parser.error(f"Can not read {pathfile}")
         else:
-            # passed scheme is not allowed
-            problem1 = parsed_url.scheme
-            msg = f"Scheme '{problem1}' from url {url_txt} not allowed"
-            parser.error(msg)
+            parser.error(f"File {pathfile} does not exist")
 
     def correct_filename(argument):
         """
@@ -61,19 +57,40 @@ def create_argument_parser():
 
     parser.add_argument('-g',
                         help='Clave hexadecimal de mas de 64 caracters',
-                        action='store_true',
-                        default=False
+                        type=correct_length
                         )
 
     parser.add_argument( '-k',
                         help=f'I need a file ft_otp.key, qui sera crypté.',
-                        type=correct_filename)
+                        type=correct_filename,
+                        nargs='+')
 
 
     return parser
 
+def hotp(file):
+    pass
 
-if __name__ == "__name__":
+def encript_key(path_to_key):
+    
+    os.chdir(os.environ["HOME"])
+    cwd = os.getcwd()
+    print(cwd)
+    pub_key_path = os.path.join(cwd, ".ssh/alice_public.pem" )
+    print(pub_key_path)
+    with open(pub_key_path, 'rb') as f:
+        pubkey = f.read()
+    PKey = OpenSSL.crypto.load_publickey(OpenSSL.SSL.FILETYPE_PEM, pubkey)
+    resutl = PKey.encrypt(b"hello")
+    print(PKey)
+    
+if __name__ == "__main__":
     parser = create_argument_parser()
-    pprint(sys.argv)
+    print("Estos son mis argumentos ",sys.argv)
     args = parser.parse_args(sys.argv[1:])
+    #args = parser.parse_args(['-g', 'pepe'])
+    print (args.g)
+    version = OpenSSL.SSL.OpenSSL_version(OpenSSL.SSL.OPENSSL_VERSION)
+    pprint.pprint(version)
+    encript_key(args.g)
+    
