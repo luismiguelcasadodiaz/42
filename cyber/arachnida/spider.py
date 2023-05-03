@@ -310,7 +310,7 @@ class Html_page():
     @html.setter
     def html(self, an_url):
         parsed_url = urlparse(an_url)
-        print("tratamos esto", parsed_url)
+        # print("tratamos esto", parsed_url)
         if parsed_url.scheme in ALLOWED_SCHEMES:
             if parsed_url.scheme in WEB_SCHEMES:
                 self.scheme = parsed_url.scheme
@@ -499,7 +499,7 @@ def img_scrapper(url, path: str, recursive: bool, level=5):
     if not recursive:
         page = Html_page(url)
         page.find_images_in_url()
-        return page.ins_img_d
+        return page.ins_img_d, Html_page.cls_link_d
     if recursive:
         if level > 0:
             parsed_url = urlparse(url)
@@ -532,14 +532,14 @@ def img_scrapper(url, path: str, recursive: bool, level=5):
                     else:
                         parsed_l = parsed_l._replace(scheme=parsed_url.scheme)
                 if parsed_l.scheme in ALLOWED_SCHEMES:
-                    dict_with_images = img_scrapper(parsed_l.geturl(), path, recursive, level - 1)
+                    dict_with_images, enlaces = img_scrapper(parsed_l.geturl(), path, recursive, level - 1)
                     links_to_images_d.update(dict_with_images)
 
-            return links_to_images_d
+            return links_to_images_d, Html_page.cls_link_d
         else:
             page = Html_page(url)
             page.find_images_in_url()
-            return page.ins_img_d
+            return page.ins_img_d, Html_page.cls_link_d
 
 
 
@@ -548,10 +548,10 @@ if __name__ == '__main__':
     parser = create_argument_parser()
     # analize arguments
     pprint(sys.argv)
-    args = parser.parse_args(sys.argv[1:])
+    #args = parser.parse_args(sys.argv[1:])
     #args = parser.parse_args(['--recursive', '--level',  '1', 'file:/Users/lcasado-/Documents/42/cyber/arachnida/eldebate.html'])
     #args = parser.parse_args(['--recursive', '--level',  '1', 'https://www.iese.edu/'])
-    
+    args = parser.parse_args(['--recursive',  'https://rodalies.gencat.cat/es/inici/'])
     """
     try:
         args = parser.parse_args(sys.argv[1:])
@@ -587,7 +587,7 @@ if __name__ == '__main__':
     #os.system('clear')
     if not args.recursive:
         if args.level is None:
-            links_to_images_d = img_scrapper(args.url[0], spiderpath,
+            links_to_images_d, links = img_scrapper(args.url[0], spiderpath,
                                              args.recursive)
         else:
             msg = f"recursitivy level {args.level} incorrect "
@@ -595,14 +595,15 @@ if __name__ == '__main__':
             parser.error(msg)
     else:
         if args.level is None:
-            links_to_images_d = img_scrapper(args.url[0], spiderpath,
+            links_to_images_d , links= img_scrapper(args.url[0], spiderpath,
                                              args.recursive, MAX_LEVEL_RECUR)
         else:
-            links_to_images_d = img_scrapper(args.url[0], spiderpath,
+            links_to_images_d, links = img_scrapper(args.url[0], spiderpath,
                                              args.recursive, args.level)
 
-    print("He encontrado ", len(links_to_images_d))
-    # pprint(links_to_images_d)
+    print("He encontrado ", len(links_to_images_d), " imagenes")
+    print("He encontrado ", len(links), " enlaces")
+    pprint(links)
 
     image_counter = 0
     # calcule to know length of counter, for zero left padding

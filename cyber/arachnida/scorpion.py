@@ -1,5 +1,4 @@
-#!/usr/bin/python3
-
+#!/Users/lcasado-/miniconda3/envs/42AI-lcasado-/bin/python
 """
 Le deuxième programme scorpion recevra des fichiers d’images en tant que
 paramètres et sera capable de les analyser pour en extraire les métadonnées
