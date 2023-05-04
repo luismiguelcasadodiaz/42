@@ -30,10 +30,13 @@ def generate_secret_key(len=20):
     #print("Secret key b32",type(K_b32), K_b32)
 
     return secret_b32.lower()
-"""
-k_b32 = generate_secret_key()
-for i in range(0,32,4):
-    print(k_b32[i:i+4],end=" ")
 
-print(generate_secret_key())
-"""
+def beautiful_key(key):
+    """ Key as binary string of 32 bytes"""
+    nice_str = ""
+    for i in range(0,32,4):
+        nice_str = nice_str + key[i:i+4].decode('utf-8') + " "
+    return nice_str[:-1]
+
+
+#print(beautiful_key(generate_secret_key(20)))
