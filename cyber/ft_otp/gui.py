@@ -2,6 +2,7 @@ import PySimpleGUI as sg
 from qrgenerator import generate_qr
 from shared_secret_key import generate_secret_key, beautiful_key
 from PIL import Image, ImageTk
+import time
 
 QR_SIZE = (300, 300)
 BASE32_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567= abcdefghijklmnopqrstuvwxyz"
@@ -69,7 +70,8 @@ TOTP_layout_Left = [
     [sg.Text("Clave secreta generada")],
     [sg.In(size=(45, 1), enable_events=True, key="-CLAVE-", font='Courier')],
     
-    [sg.Button("Uso mi clave", key="-USE-")]
+    [sg.Button("Uso mi clave", key="-USE-")],
+    [sg.Text("Clave secreta generada", key="-SECONDS-")],
 ]
 TOTP_layout_Right = [
     [sg.Text("QR CODE")],
@@ -84,7 +86,11 @@ TOTP_layout = [
     ]
 ]
 window = sg.Window(title="Time-based One time Paswword generator - (TOTP)", layout=TOTP_layout , margins=(15, 15))
+start_time = time.time()
+my_time = start_time
 while True:
+    actual_time = time.time()
+    elapsed_time = actual_time - my_time  #  time diff between loops
     event, values = window.read()
     if event == "Exit" or event == sg.WIN_CLOSED:
         break
