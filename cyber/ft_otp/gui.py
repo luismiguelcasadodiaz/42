@@ -45,11 +45,12 @@ def cb_func_use_my_key():
 
 def cb_func_update_key(clave_bytes=None):
     if clave_bytes is None:
-        clave_bytes = generate_secret_key()
-    window["-CLAVE-"].update(beautiful_key(clave_bytes))
+        #clave_bytes = generate_secret_key()
+        clave_bytes = 'MNUGC2DBGBZQMNUGC2DBGBZQMNUGC2DBGBZQMNUGC2DBGBZQMNUGC2DBGBZQ===='
+    window["-CLAVE-"].update(clave_bytes)
     user = values["-USER-"]
     mail = values["-MAIL-"]
-    imagepath = generate_qr(clave_bytes.decode('utf-8'), user, mail)
+    imagepath = generate_qr(clave_bytes, user, mail)
     im = Image.open(imagepath)
 
     im = im.resize(QR_SIZE, resample=Image.BICUBIC)

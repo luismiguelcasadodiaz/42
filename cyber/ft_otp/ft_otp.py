@@ -43,27 +43,33 @@ def create_argument_parser():
                 cwd = os.getcwd()
                 filepath = os.path.join(cwd, argument)
                 if os.path.isfile(filepath):
-                    if not os.access(spiderpath, os.R_OK):
+                    if not os.access(filepath, os.R_OK):
                         parser.error(f"can not read'{argument}'")
             except:
-                parser.error(f"Incorrect recursivity level '{argument}'")
+                parser.error(f"Can not find '{argument}'")
     msg = """
     Permet d’enregistrer un mot de passe initial, et qui est capable"
     de générer un nouveau mot de passe chaque fois qu’il est demandé"""
     parser = argparse.ArgumentParser(
                                      prog='Time One-Time-Password generator',
                                      description=msg,
-                                     epilog='Este es el final de la ayuda')
+                                     epilog='Este es el final de la ayuda',
+                                     usage = "ft_otp -g key.hex | ./ft_otp -k ft_otp.key")
 
-    parser.add_argument('-g',
+   
+    parser.add_argument('--GUI',
+                        help='Ejecuta la aplicacion con un interface grafico',
+                        type=correct_length
+                        )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument( '-k',
+                        help=f'I need a file ft_otp.key, qui sera crypté.',
+                        type=correct_filename)
+                        #nargs='+')
+    group.add_argument('-g',
                         help='Clave hexadecimal de mas de 64 caracters',
                         type=correct_length
                         )
-
-    parser.add_argument( '-k',
-                        help=f'I need a file ft_otp.key, qui sera crypté.',
-                        type=correct_filename,
-                        nargs='+')
 
 
     return parser
