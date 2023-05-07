@@ -1,18 +1,27 @@
 #!/Users/lcasado-/miniconda3/envs/42AI-lcasado-/bin/python
 
 from cryptography.fernet import Fernet
+import os
  
-# we will be encrypting the below string.
-message = "hello geeks"
  
 # generate a key for encryption and decryption
-# You can use fernet to generate
+# You can use fernet to generate a simmetric key
 # the key or use random key generator
 # here I'm using fernet to generate key
  
 key = Fernet.generate_key()
- 
-# Instance the Fernet class with the key
+cifer_key_path = os.path.join(os.environ["HOME"], ".ssh/.encrypt.key" )
+with open(cifer_key_path,'wb') as f:
+        f.write(key)
+
+print(f" I generated {cifer_key_path}")
+"""
+
+
+
+
+
+ Instance the Fernet class with the key
  
 fernet = Fernet(key)
  
@@ -32,3 +41,5 @@ print("encrypted string: ", encMessage)
 decMessage = fernet.decrypt(encMessage).decode()
  
 print("decrypted string: ", decMessage)
+
+"""

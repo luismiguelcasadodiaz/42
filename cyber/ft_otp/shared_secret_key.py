@@ -20,23 +20,41 @@
 
 import ssl
 import base64
+import os
 
 def generate_secret_key(len=20):
     """
     Returns len cryptographically strong pseudo-random bytes
     """
     secret = ssl.RAND_bytes(len) 
-    secret_b32 = base64.b32encode(secret)
+    #secret_b32 = base64.b32decode(secret)
     #print("Secret key b32",type(K_b32), K_b32)
 
-    return secret_b32.lower()
+    #return secret_b32.lower()
+    return str(hex(int.from_bytes(secret))[2:]).encode()
+    #return secret
 
 def beautiful_key(key):
     """ Key as binary string of 32 bytes"""
     nice_str = ""
-    for i in range(0,32,4):
+    for i in range(0,len(key),4):
+        nice_str = nice_str + key[i:i+4].decode('utf-8') + " "
+    return nice_str[:-1]
+
+def beautiful_keyb32(key64):
+    key = base64.b32encode(key64)
+    """ Key as binary string of 32 bytes"""
+    nice_str = ""
+    for i in range(0,len(key),4):
         nice_str = nice_str + key[i:i+4].decode('utf-8') + " "
     return nice_str[:-1]
 
 
-#print(beautiful_key(generate_secret_key(20)))
+totp_key = generate_secret_key(32)
+path = os.path.join(os.getcwd(), "ft_otp.hex")
+with open(path,'bw') as f:
+    f.write(totp_key)
+
+print(f"TOTP key {beautiful_key(totp_key)} saved in ft_otp.hex")
+print(f"TOTP key {beautiful_keyb32(totp_key)} saved in ft_otp.hex")
+
