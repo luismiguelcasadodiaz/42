@@ -26,7 +26,23 @@ def generate_secret_key(len=20):
     """
     Returns len cryptographically strong pseudo-random bytes
     """
-    secret = ssl.RAND_bytes(len) 
+    secret = ssl.RAND_bytes(len)
+    secret_to_check = secret[:]
+    
+    """
+    for idx, v in enumerate (secret_to_check):
+         if 50 <= v and v <= 55 or 65 <= v and v <= 90:
+            secret = secret + v
+         else:
+            found = False
+            while not found:        
+                s = ssl.RAND_bytes(1)
+                if 50 <= s[0] and s[0] <= 55 or 65 <= s[0] and s[0] <= 90:
+                    found = True
+                    secret = secret + s
+
+    for elem in secret: print(chr(elem), end = " ")
+    """
     #secret_b32 = base64.b32decode(secret)
     #print("Secret key b32",type(K_b32), K_b32)
 

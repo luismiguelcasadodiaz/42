@@ -3,6 +3,7 @@ from qrgenerator import generate_qr
 from shared_secret_key import generate_secret_key, beautiful_key
 from PIL import Image, ImageTk
 import time
+import base64
 
 QR_SIZE = (300, 300)
 BASE32_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567= abcdefghijklmnopqrstuvwxyz"
@@ -46,11 +47,13 @@ def cb_func_use_my_key():
 def cb_func_update_key(clave_bytes=None):
     if clave_bytes is None:
         #clave_bytes = generate_secret_key()
-        clave_bytes = 'MNUGC2DBGBZQMNUGC2DBGBZQMNUGC2DBGBZQMNUGC2DBGBZQMNUGC2DBGBZQ===='
+        clave_bytes = '3bb2bd2abc0240fcaf901a359a885e68d0ef4d9988c31c7789b1e7575d9c56d7'
+        clave_bytes = bytes.fromhex('6161616162626262636363636464646465656565666666666767676768686868')
+        #clave_bytes = base64.b32encode(clave_bytes.encode())
     window["-CLAVE-"].update(clave_bytes)
     user = values["-USER-"]
     mail = values["-MAIL-"]
-    imagepath = generate_qr(clave_bytes, user, mail)
+    imagepath = generate_qr(clave_bytes.decode(), user, mail)
     im = Image.open(imagepath)
 
     im = im.resize(QR_SIZE, resample=Image.BICUBIC)
@@ -61,9 +64,11 @@ def cb_func_update_key(clave_bytes=None):
 
 TOTP_layout_Left = [
     [sg.Text("User name")],
-    [sg.In(size=(45, 1), enable_events=True, key="-USER-",font='Courier')],
+    [sg.In(size=(45, 1), enable_events=True, key="-USER-",font='Courier',
+           default_text="Luis Miguel")],
     [sg.Text("User mail")],
-    [sg.In(size=(45, 1), enable_events=True, key="-MAIL-",font='Courier')],
+    [sg.In(size=(45, 1), enable_events=True, key="-MAIL-",font='Courier',
+           default_text="42Barcelona")],
     [sg.HSeparator()],
    # [sg.Text("Usa una clave secreta conocida")],
    # [sg.In(size=(25, 1), enable_events=True, key="-CLAVE-")],

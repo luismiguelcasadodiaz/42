@@ -43,3 +43,10 @@ decMessage = fernet.decrypt(encMessage).decode()
 print("decrypted string: ", decMessage)
 
 """
+secret = '6161616162626262636363636464646465656565666666666767676768686868'
+secret_bytes = bytes.fromhex(secret)
+pathfile = os.path.join(os.getcwd(), "ft_otp2.hex")
+with open(pathfile, 'wb') as f:
+        f.write(secret_bytes)
+
+print(f" I generated {cifer_key_path}")

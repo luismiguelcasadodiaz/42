@@ -1,6 +1,6 @@
 import hmac, base64, struct, hashlib, time
 def get_hotp_token(secret, intervals_no):
-    key = base64.b32decode(secret, True)
+    key = base64.b32decode(secret, True, map01='l')
     print("Ejemplo key =",key)
     #print("My  key_b32 =",b'chaha0s\x066\x86\x16\x86\x13\x070chaha0s\x066\x86\x16\x86\x13\x070chaha0s')
     #decoding our key
@@ -25,7 +25,7 @@ def get_totp_token(secret):
     return x
 #base64 encoded key
 secret = 'MNUGC2DBGBZQ===='   #  16 Bytes lenghts key
-secret = 'MNUGC2DBGBZQMNUGC2DBGBZQMNUGC2DBGBZQMNUGC2DBGBZQMNUGC2DBGBZQ===='   #  64 Bytes lenghts key
+secret = 'aaaabbbbccccddddeeeeffffgggghhhh'   #  64 Bytes lenghts key
 aaaaaa = '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'
 aaaaaa = '          1         2         3         4         5         6         7         8         9         0         1         2         3'
 aaaaaa = '                                                                                                              1         2         3'

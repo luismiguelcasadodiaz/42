@@ -5,12 +5,15 @@
 import os
 import sys
 import argparse
-import OpenSSL
-import rsa
-import pprint
+import hashlib
 import warnings as _warnings
 from cryptography.fernet import Fernet     # to cyfer Key into ft_otp.key
-import base64
+import base64, hmac
+import datetime
+
+TIME_STEP = 30  #seconds
+TOTP_LENGTH = 6
+TOTP_DIVISOR = 10 ** TOTP_LENGTH
 
 def create_argument_parser():
 
@@ -27,13 +30,14 @@ def create_argument_parser():
                 # 3.- read the file and check length
                 with open(pathfile, 'rb') as f:
                     text = f.read().strip()  # remove \n: does not belong to Key
+                    #text = b'aaaabbbbccccddddeeeeffffgggghhhh'
                 # 4.- if length is ok
-                size = len(text)
+                size = len(text.hex())
                 if  size >=64:
                     # 5.- if ti is a hexadecimal string.
                     is_hex = True
-                    hex_chars = b'0123456789ABCDEF'
-                    for char in text.upper():                     
+                    hex_chars = '0123456789ABCDEF'
+                    for char in text.hex().upper():                     
                         if char not in hex_chars:
                             is_hex = False
                             break
@@ -76,6 +80,10 @@ def create_argument_parser():
                                      usage = "ft_otp -g key.hex | ./ft_otp -k ft_otp.key")
 
     group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument( '-s',
+                        help=f'I need a file ft_otp.key, qui sera crypté.',
+                        type=correct_filename)
+                        #nargs='+')
     group.add_argument( '-k',
                         help=f'I need a file ft_otp.key, qui sera crypté.',
                         type=correct_filename)
@@ -156,13 +164,62 @@ def decrypt_key(path_to_key):
 
     return key_cyphered
 
+def get_totp_token(secret):
+    # Encode the secret into a base 32 string 
+    secret_b32 = base64.b32decode(secret.decode(),True, map01='l')
+    print("secret b32 = ", secret_b32)
 
+    # Calculate number of time steps since beginin of time in UTC time Zone
+    int_dt_utc = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+    
+    N = int_dt_utc // TIME_STEP   #  Num of intervals
+
+    # Convert the number of time steps into an 8 bytes hexadecinal string value
+    m = int.to_bytes(N,length=8)    # 
+
+    """
+    # I sol
+    Nhex_rigth_len = 16
+    print("Ndec ", N)
+    Nhex = hex(N)[2:]  # remove '0x'
+    print("Nhex ", Nhex)
+    
+    Nhex_16 = f"0x{Nhex:0>{Nhex_rigth_len}}"    # 0x0000000003114810
+    print("Nhex_16 ",Nhex_16)
+    m = bytes.fromhex(Nhex_16[2:])     # b'\x00\x00\x00\x00\x03\x11H\x10'
+    print("m = ", m)
+    print("m = ", int.to_bytes(N,8))
+    """
+    #Hash the number of time steps wiht the secret
+    hash = hmac.new(secret_b32, m, hashlib.sha1).digest()
+
+    print(len(hash), "hash Digest = ", hash)
+    offset = digest_last_nibble = hash[19] & 0xF     #    xxxx and 1111
+    print("offset = ",offset)
+    
+    signed_4b_hash= hash[offset:offset + 4]     # 4 bytes start in offset
+    print("signed_4b_hash = ", signed_4b_hash)
+    mask = bytes.fromhex('7fffffff')
+    print("signed_4b_hash = ", mask)
+
+
+    un_signed_4b_hash = bytes([ h & m for h, m in zip(signed_4b_hash, mask)])
+    print("un signed_4b_hash = ", un_signed_4b_hash)
+    gross_totp = int.from_bytes(un_signed_4b_hash)
+    print("gross_otp = ", gross_totp)
+    
+    net_totp = gross_totp % TOTP_DIVISOR
+    str_totp = str(net_totp)
+    print(len(str_totp), " net_totp ",str(str_totp))#adding 0 in the beginning till OTP has 6 digits
+    while len(str_totp)!=6:
+        str_totp ='0' + str_totp
+    return str_totp
     
 if __name__ == "__main__":
     parser = create_argument_parser()
     
-    #args = parser.parse_args(sys.argv[1:])
-    args = parser.parse_args(['-g','ft_otp.hex'])
+    args = parser.parse_args(sys.argv[1:])
+    #args = parser.parse_args(['-g','ft_otp2.hex'])
     #args = parser.parse_args(['-k','ft_otp.key'])
     print("Estos son mis argumentos ",args)
     if args.GUI:
@@ -176,8 +233,27 @@ if __name__ == "__main__":
         if args.k is not None:
            msg = "Me han dado pedido el proximo OTP basado "
            msg = msg + f"en {args.k}"
-           totp_key = decrypt_key(args.k)
            _warnings.warn(msg, RuntimeWarning, 2)
+           totp_key = decrypt_key(args.k)
+           print(get_totp_token(totp_key))
+           
+        if args.s is not None:
+            msg = "Me han dado pedido secuencia de OTP basado "
+            msg = msg + f"en {args.s}"
+            _warnings.warn(msg, RuntimeWarning, 2)
+            totp_key = decrypt_key(args.s)
+            print(get_totp_token(totp_key))
+            s= int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+            
+            while True:
+                aux= datetime.datetime.now(datetime.timezone.utc)
+                n = int(aux.timestamp())
+                elapsed_time = n-s
+                if elapsed_time == TIME_STEP:
+                    print(get_totp_token(totp_key))
+                    s = n
+                else:
+                    print(f"elapsed_time:{TIME_STEP - elapsed_time:0>2}", end="\r")
     """
     #args = parser.parse_args(['-g', 'pepe'])
     print (args.g)

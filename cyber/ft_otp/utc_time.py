@@ -10,6 +10,7 @@
 
 import datetime
 import pytz
+import struct
 tz_where_am_i = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 dt_000 = datetime.datetime.fromtimestamp(0)
 dt_bcn = datetime.datetime.now()
@@ -27,7 +28,9 @@ print("EPC  ", dt_epc)
 print("UTC_TS", dt_utc.timestamp())
 print("000_TS", dt_000.timestamp())
 
-
+dt_utc = datetime.datetime.now(datetime.timezone.utc).timestamp()
+print("UTC_TS", dt_utc)
+print("UTC_TS", int(dt_utc))
 
 
 # divido la correspondencia de mi tiempo 
@@ -40,20 +43,25 @@ print("VID_TS", dt_vid_utc.timestamp())
 timestep = 30  # Seconds
 Nhex_rigth_len = 16
 N = int(dt_vid.timestamp() // timestep)
-print("Ndec ", N)
+print("N dec    ", N)
 Nhex = hex(N)[2:]  # remove '0x'
-print("Nhex ", Nhex)
+print("N hex    ", Nhex)
 Nhex_len = len(Nhex)
 Nhex_16 = f"0x{Nhex:0>{Nhex_rigth_len}}"
-print("Nhex_16 ",Nhex_16)
+print("N hex_16 ",Nhex_16)
+
+msg = struct.pack(">Q", N)
+print("N Bytes  ", msg)
+
 
 an_integer = int(Nhex_16,Nhex_rigth_len)
 print("an_integer ", an_integer)
 print("an Hex", hex(an_integer))
 
-#m = (Nhex_16).to_bytes()
-#print(m)
 
+m = bytes.fromhex(Nhex_16[2:])
+print(m)
+"""
 Hbytes=(N).to_bytes(length=4, byteorder="big")
 aux = b'\x00\x00\x00\x00\x00\x00\x00\x00'
 auxb = bin(aux)
@@ -62,8 +70,4 @@ r = bin(aux) | bin(an_integer)
 print("Hbytes ",  r)
 print("Hbytes len ",len(Hbytes))
 
-
-
-
-
-
+"""
