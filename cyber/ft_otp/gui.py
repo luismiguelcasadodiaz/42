@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 from qrgenerator import generate_qr
-from shared_secret_key import generate_secret_key, beautiful_key
+from shared_secret_key import generate_secret_key, beautiful_key, convert_user_input
 from PIL import Image, ImageTk
 import time
 import base64
@@ -24,8 +24,16 @@ def cb_func_use_my_key():
     while True:             # Event Loop
         event, values = my_window.read()
         print(event, values)
+        
         if event == sg.WIN_CLOSED or event == 'Exit':
             break
+        if event == '-INPUT-':
+            my_window['-CONTADOR-'].update(input_size)
+        if event == '-INPUT-' and values['-INPUT-'][-1] == "\n":
+            my_window['-INPUT-'].update(values['-INPUT-'][:-1])
+            user_key = values['-INPUT-']
+            window["-CLAVE-"].update(convert_user_input(user_key))
+        """
         # if last char entered not a digit
         if event == '-INPUT-' and len(values['-INPUT-']) and values['-INPUT-'][-1] not in BASE32_CHARSET:
             # delete last char from input
@@ -39,21 +47,21 @@ def cb_func_use_my_key():
            resultado = values['-INPUT-'][:-1]
            resultado_b="".join(resultado.split("=")).encode('utf8')
            break
-
+        """
     my_window.close()
     window["-CLAVE-"].update(resultado_b)
 
 
 def cb_func_update_key(clave_bytes=None):
     if clave_bytes is None:
-        #clave_bytes = generate_secret_key()
-        clave_bytes = '3bb2bd2abc0240fcaf901a359a885e68d0ef4d9988c31c7789b1e7575d9c56d7'
-        clave_bytes = bytes.fromhex('6161616162626262636363636464646465656565666666666767676768686868')
+        clave_bytes = generate_secret_key(32)
+        #clave_bytes = '3bb2bd2abc0240fcaf901a359a885e68d0ef4d9988c31c7789b1e7575d9c56d7'
+        #clave_bytes = bytes.fromhex('6161616162626262636363636464646465656565666666666767676768686868')
         #clave_bytes = base64.b32encode(clave_bytes.encode())
     window["-CLAVE-"].update(clave_bytes)
     user = values["-USER-"]
     mail = values["-MAIL-"]
-    imagepath = generate_qr(clave_bytes.decode(), user, mail)
+    imagepath = generate_qr(clave_bytes, user, mail)
     im = Image.open(imagepath)
 
     im = im.resize(QR_SIZE, resample=Image.BICUBIC)

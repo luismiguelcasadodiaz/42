@@ -26,28 +26,28 @@ def generate_secret_key(len=20):
     """
     Returns len cryptographically strong pseudo-random bytes
     """
-    secret = ssl.RAND_bytes(len)
-    secret_to_check = secret[:]
-    
-    """
-    for idx, v in enumerate (secret_to_check):
-         if 50 <= v and v <= 55 or 65 <= v and v <= 90:
+    secret = b''
+    for _ in range(len):
+        v = ssl.RAND_bytes(1)
+        if 50 <= v[0] and v[0] <= 55 or 65 <= v[0] and v[0] <= 90:
             secret = secret + v
-         else:
+        else:
             found = False
             while not found:        
                 s = ssl.RAND_bytes(1)
                 if 50 <= s[0] and s[0] <= 55 or 65 <= s[0] and s[0] <= 90:
                     found = True
                     secret = secret + s
+        
+ 
 
-    for elem in secret: print(chr(elem), end = " ")
-    """
-    #secret_b32 = base64.b32decode(secret)
-    #print("Secret key b32",type(K_b32), K_b32)
+    #print( " Secret_random = ",secret)
+    
+    secret_b32 = base64.b32decode(secret)
+    #print("Secret key b32= ",type(secret_b32), secret_b32)
 
     #return secret_b32.lower()
-    return str(hex(int.from_bytes(secret))[2:]).encode()
+    return secret_b32
     #return secret
 
 def beautiful_key(key):
@@ -65,7 +65,11 @@ def beautiful_keyb32(key64):
         nice_str = nice_str + key[i:i+4].decode('utf-8') + " "
     return nice_str[:-1]
 
-
+def convert_user_input(user_key):
+    user_key_b=bytearray(user_key,'utf-8')
+    user_key_b32= base64.b32encode(user_key_b)
+    return user_key_b32
+"""
 totp_key = generate_secret_key(32)
 path = os.path.join(os.getcwd(), "ft_otp.hex")
 with open(path,'bw') as f:
@@ -74,3 +78,7 @@ with open(path,'bw') as f:
 print(f"TOTP key {beautiful_key(totp_key)} saved in ft_otp.hex")
 print(f"TOTP key {beautiful_keyb32(totp_key)} saved in ft_otp.hex")
 
+user = input("Texto >")
+print(convert(user))
+"""
+print(generate_secret_key(32))

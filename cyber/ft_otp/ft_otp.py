@@ -19,6 +19,16 @@ TOTP_DIVISOR = 10 ** TOTP_LENGTH
 
 def create_argument_parser():
 
+    def user_correct_length(argument):
+        user_key_b=bytearray(argument,'utf-8')
+        user_key_b32= base64.b32encode(user_key_b)
+        cwd = os.getcwd()
+        pathfile = os.path.join(cwd, 'ft_otp_user.hex')
+        with open(pathfile, 'wb') as f:
+            f.write(user_key_b32)
+        resultado = correct_length(pathfile)
+        return resultado
+
     def correct_length(file):
         """
           helper function checks if Hexadecimal key is longer than 64
@@ -86,7 +96,7 @@ def create_argument_parser():
                                      prog='Time One-Time-Password generator',
                                      description=msg,
                                      epilog='Este es el final de la ayuda',
-                                     usage = "ft_otp -g key.hex | ./ft_otp -k ft_otp.key")
+                                     usage = "ft_otp -g HEXFILE |./ft_otp -u PHRASE | ./ft_otp -k ft_otp.key | ./ft_otp -s ft_otp.key | --GUI")
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument( '-s',
@@ -100,6 +110,10 @@ def create_argument_parser():
     group.add_argument('-g',
                         help='Clave hexadecimal de mas de 64 caracters',
                         type=correct_length
+                        )
+    group.add_argument('-u',
+                        help='Frase del usuario para generar un ft_user.key',
+                        type=user_correct_length
                         )
     group.add_argument('--GUI',
                         help='Ejecuta la aplicacion con un interface grafico',
@@ -138,10 +152,10 @@ def encrypt_key(path_to_key):
         with open(os.path.join(path, "ft_otp.key"), 'bw') as f:
             f.write(totp_key_encrypted)
         msg = "ft_otp.Key has been created"
-        _warnings.warn(msg,RuntimeWarning, 2)
+        print(msg)
     except FileNotFoundError:
         msg = "Encription Key not found. Execute 'generate_encrypt_key.py'"
-        _warnings.warn(msg,RuntimeWarning, 2)
+        print(msg)
 
 def decrypt_key(path_to_key):
     path_file = os.path.split(path_to_key)
@@ -215,26 +229,27 @@ if __name__ == "__main__":
     args = parser.parse_args(sys.argv[1:])
     #args = parser.parse_args(['-g','ft_otp.hex'])
     #args = parser.parse_args(['-k','ft_otp.key'])
+    #args = parser.parse_args(['-u','Buenos Dias'])
     print("Estos son mis argumentos ",args)
     if args.GUI:
-        _warnings.warn("Me han pedido qie me ejecute en modo grafico")
+        print("Me han pedido que me ejecute en modo grafico")
     else:
         if args.g is not None:
             msg = f"Me han dado una clave {args.g} para que la guarde "
             msg = msg + "cifrada en ft_otp.key"
-            _warnings.warn(msg, RuntimeWarning, 2)
+            print(msg)
             encrypt_key(args.g)
         if args.k is not None:
            msg = "Me han dado pedido el proximo OTP basado "
            msg = msg + f"en {args.k}"
-           _warnings.warn(msg, RuntimeWarning, 2)
+           print(msg)
            totp_key = decrypt_key(args.k)
            print(get_totp_token(totp_key))
            
         if args.s is not None:
             msg = "Me han dado pedido secuencia de OTP basado "
             msg = msg + f"en {args.s}"
-            _warnings.warn(msg, RuntimeWarning, 2)
+            print(msg)
             totp_key = decrypt_key(args.s)
             totp = get_totp_token(totp_key)
             print(totp, end="\n")
@@ -253,4 +268,10 @@ if __name__ == "__main__":
                     s = n
                 else:
                     print(f"Elapsed_time:{TIME_STEP - elapsed_time:0>2}", end="\r")
+
+        if args.u is not None:
+            msg = "Me han dado una clave texto plano del usuario "
+            msg = msg + f"> {args.u} < con la que generar un ft_user.key"
+            encrypt_key(args.u)
+
 
