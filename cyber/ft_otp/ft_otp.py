@@ -1,6 +1,7 @@
+#!/Users/lcasado-/miniconda3/envs/42AI-lcasado-/bin/python
 #!/home/luis/anaconda3/envs/42AI-lcasado-/bin/python
 
-#!/Users/lcasado-/miniconda3/envs/42AI-lcasado-/bin/python
+
 
 import os
 import sys
@@ -10,6 +11,7 @@ import warnings as _warnings
 from cryptography.fernet import Fernet     # to cyfer Key into ft_otp.key
 import base64, hmac
 import datetime
+import binascii
 
 TIME_STEP = 30  #seconds
 TOTP_LENGTH = 6
@@ -34,18 +36,25 @@ def create_argument_parser():
                 # 4.- if length is ok
                 size = len(text.hex())
                 if  size >=64:
-                    # 5.- if ti is a hexadecimal string.
-                    is_hex = True
-                    hex_chars = '0123456789ABCDEF'
-                    for char in text.hex().upper():                     
-                        if char not in hex_chars:
-                            is_hex = False
-                            break
-                    del text
-                    if is_hex:
-                        return pathfile
+                    # 4bis.- size has to be a multiple of 4.
+                    if (size % 4) == 0:
+                        # 5.- if ti is a hexadecimal string.
+                        is_base32 = True
+                        #hex_chars = '0123456789ABCDEF'
+                        base32_alphabet =b'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='
+                        #for char in text.hex().upper():        
+                        for char in text:             
+                            if char not in base32_alphabet:
+                                is_base32 = False
+                                break
+                        del text
+                        if is_base32:
+                            return pathfile
+                        else:
+                            parser.error("Key is not Base32")
                     else:
-                        parser.error("Key is not hexadecimal")
+                        msg = f"Key Length {size} must be a multiple of 4"
+                        parser.error(msg)
                 else:
                     parser.error(f"Key lenght of {size} is smaller than 64")
             else:
@@ -112,24 +121,18 @@ def encrypt_key(path_to_key):
     cifer_key_path = os.path.join(os.environ["HOME"], ".ssh/.encrypt.key" )
     try:
 
-        print("cifer_key_path", cifer_key_path)
         with open(cifer_key_path, 'rb') as f:
             cifer_key = f.read()
-        print("cifer_key          = ", cifer_key)
-        
+
         # initialize encrypter wiht the key 
         fernet = Fernet(cifer_key)
 
-        # get the key i have to save into ft_otp.key cyphered#
+        # get the key in ft_otp.hex i have to save into ft_otp.key cyphered#
         with open(path_to_key, 'rb') as f:
             totp_key_to_encrypt = f.read().strip()
-        print("totp key           = ",totp_key_to_encrypt)
 
         
         totp_key_encrypted = fernet.encrypt(totp_key_to_encrypt)
-
-
-        print("totp_key_encrypted = ",totp_key_encrypted)
 
         # write into ft_otp.key the cyphered#"
         with open(os.path.join(path, "ft_otp.key"), 'bw') as f:
@@ -146,9 +149,13 @@ def decrypt_key(path_to_key):
 
     # read the key used to seed cifer tool
     cifer_key_path = os.path.join(os.environ["HOME"], ".ssh/.encrypt.key" )
-    with open(cifer_key_path, 'rb') as f:
-            cifer_key = f.read()
-    print("cifer_key          = ", cifer_key)
+    try:
+        with open(cifer_key_path, 'rb') as f:
+                cifer_key = f.read()
+    except FileNotFoundError:
+        msg = f"Not found {cifer_key_path}. "
+        msg = msg + "Execute 'generate_encrypt_key.py"
+        raise ValueError(msg)
 
        
     # initialize encrypter wiht the key
@@ -160,58 +167,45 @@ def decrypt_key(path_to_key):
     
     # decrypt TOTP Key
     key_cyphered = fernet.decrypt(totp_key_encrypted)
-    print("key_cyphered       = ",key_cyphered)
 
     return key_cyphered
 
 def get_totp_token(secret):
-    # Encode the secret into a base 32 string 
-    secret_b32 = base64.b32decode(secret.decode(),True, map01='l')
-    print("secret b32 = ", secret_b32)
-
+    try:
+        # Encode the secret into a base 32 string 
+        secret_b32 = base64.b32decode(secret.decode(),True, map01='l')
+        
+    except binascii.Error:
+        secret_b32 = base64.b64decode(secret.decode())
+        print("secret b32 = ", secret_b32)
     # Calculate number of time steps since beginin of time in UTC time Zone
     int_dt_utc = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
     
     N = int_dt_utc // TIME_STEP   #  Num of intervals
 
     # Convert the number of time steps into an 8 bytes hexadecinal string value
-    m = int.to_bytes(N,length=8)    # 
+    m = int.to_bytes(N,length=8,byteorder='big')    # 
 
-    """
-    # I sol
-    Nhex_rigth_len = 16
-    print("Ndec ", N)
-    Nhex = hex(N)[2:]  # remove '0x'
-    print("Nhex ", Nhex)
-    
-    Nhex_16 = f"0x{Nhex:0>{Nhex_rigth_len}}"    # 0x0000000003114810
-    print("Nhex_16 ",Nhex_16)
-    m = bytes.fromhex(Nhex_16[2:])     # b'\x00\x00\x00\x00\x03\x11H\x10'
-    print("m = ", m)
-    print("m = ", int.to_bytes(N,8))
-    """
     #Hash the number of time steps wiht the secret
     hash = hmac.new(secret_b32, m, hashlib.sha1).digest()
-
-    print(len(hash), "hash Digest = ", hash)
+    # get the offset form the last nibble
     offset = digest_last_nibble = hash[19] & 0xF     #    xxxx and 1111
-    print("offset = ",offset)
+    
     
     signed_4b_hash= hash[offset:offset + 4]     # 4 bytes start in offset
-    print("signed_4b_hash = ", signed_4b_hash)
+   
     mask = bytes.fromhex('7fffffff')
-    print("signed_4b_hash = ", mask)
-
-
+ 
     un_signed_4b_hash = bytes([ h & m for h, m in zip(signed_4b_hash, mask)])
-    print("un signed_4b_hash = ", un_signed_4b_hash)
-    gross_totp = int.from_bytes(un_signed_4b_hash)
-    print("gross_otp = ", gross_totp)
-    
+
+    gross_totp = int.from_bytes(un_signed_4b_hash, byteorder='big')
+    # get the lest significative digites
     net_totp = gross_totp % TOTP_DIVISOR
+
+    # in case i got less than 6 digits
     str_totp = str(net_totp)
-    print(len(str_totp), " net_totp ",str(str_totp))#adding 0 in the beginning till OTP has 6 digits
-    while len(str_totp)!=6:
+    
+    while len(str_totp) < TOTP_LENGTH:
         str_totp ='0' + str_totp
     return str_totp
     
@@ -219,7 +213,7 @@ if __name__ == "__main__":
     parser = create_argument_parser()
     
     args = parser.parse_args(sys.argv[1:])
-    #args = parser.parse_args(['-g','ft_otp2.hex'])
+    #args = parser.parse_args(['-g','ft_otp.hex'])
     #args = parser.parse_args(['-k','ft_otp.key'])
     print("Estos son mis argumentos ",args)
     if args.GUI:
@@ -242,7 +236,9 @@ if __name__ == "__main__":
             msg = msg + f"en {args.s}"
             _warnings.warn(msg, RuntimeWarning, 2)
             totp_key = decrypt_key(args.s)
-            print(get_totp_token(totp_key))
+            totp = get_totp_token(totp_key)
+            print(totp, end="\n")
+            print("-" * TOTP_LENGTH, end="\n")
             s= int(datetime.datetime.now(datetime.timezone.utc).timestamp())
             
             while True:
@@ -250,15 +246,11 @@ if __name__ == "__main__":
                 n = int(aux.timestamp())
                 elapsed_time = n-s
                 if elapsed_time == TIME_STEP:
-                    print(get_totp_token(totp_key))
+                    totp = get_totp_token(totp_key)
+                    print(totp, "               ",end="\n")
+                    print("-" * TOTP_LENGTH, end="\n")
+                    #print(f"Elapsed_time:{0:0>2}", end="\n")
                     s = n
                 else:
-                    print(f"elapsed_time:{TIME_STEP - elapsed_time:0>2}", end="\r")
-    """
-    #args = parser.parse_args(['-g', 'pepe'])
-    print (args.g)
-    version = OpenSSL.SSL.OpenSSL_version(OpenSSL.SSL.OPENSSL_VERSION)
-    pprint.pprint(version)
-    encript_key(args.g)
-    """
-    
+                    print(f"Elapsed_time:{TIME_STEP - elapsed_time:0>2}", end="\r")
+

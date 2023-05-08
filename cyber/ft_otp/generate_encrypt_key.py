@@ -1,4 +1,5 @@
 #!/Users/lcasado-/miniconda3/envs/42AI-lcasado-/bin/python
+#!/home/luis/anaconda3/envs/42AI-lcasado-/bin/python
 
 from cryptography.fernet import Fernet
 import os
@@ -15,6 +16,7 @@ with open(cifer_key_path,'wb') as f:
         f.write(key)
 
 print(f" I generated {cifer_key_path}")
+print("BE AWARE THAT NOW TOTP KEY HAS TO BE RE-CYPHERED")
 """
 
 
