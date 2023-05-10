@@ -1,5 +1,5 @@
-#!/Users/lcasado-/miniconda3/envs/42AI-lcasado-/bin/python
 #!/home/luis/anaconda3/envs/42AI-lcasado-/bin/python
+#!/Users/lcasado-/miniconda3/envs/42AI-lcasado-/bin/python
 
 
 
@@ -98,7 +98,8 @@ def gui():
 
     ]
     TOTP_layout_down = [
-        [sg.Button("Genera TOTP", key="-TOTP-"),sg.Text("CODE",key="-CODE-")]
+        [sg.Button("Genera TOTP", key="-TOTP-"),
+         sg.Text("CODE",key="-CODE-", font='Courier36', text_color='black',)]
     ]
     TOTP_layout = [
         [sg.Column(TOTP_layout_Left),sg.VSeparator(),sg.Column(TOTP_layout_Right)],
