@@ -10,13 +10,136 @@ import hashlib
 import warnings as _warnings
 from cryptography.fernet import Fernet     # to cyfer Key into ft_otp.key
 import base64, hmac
-import datetime
+import time, datetime
 import binascii
 import ssl
+import PySimpleGUI as sg
+from qrgenerator import generate_qr
+from PIL import Image, ImageTk
 
 TIME_STEP = 30  #seconds
 TOTP_LENGTH = 6
 TOTP_DIVISOR = 10 ** TOTP_LENGTH
+QR_SIZE = (300, 300)
+
+
+def gui():
+
+    def cb_func_read_user_key(event, values):
+        if event == '-USERKEY-':
+            input_size = len(values['-USERKEY-'])
+            window['-CONTADOR-'].update(input_size)
+            if input_size > 10:
+                window['-USERKEYOK-'].update(disabled = False)
+
+
+    def cb_func_treat_user_key():
+        user_key = values['-USERKEY-']
+        print(user_key)
+        pathfile = user_correct_length(user_key)
+        with open(pathfile, 'rb') as f:
+            user_key_b32= f.read().strip()
+        window["-RENDERKEY-"].update(user_key_b32.decode())
+        encrypt_key(pathfile)
+
+    def cb_func_update_key(clave_bytes=None):
+        pathfile = generate_random_key()
+        with open(pathfile, 'rb') as f:
+            text = f.read()
+        window["-RANDOM-"].update(text.decode())
+        window["-RENDERKEY-"].update(text.decode())
+        encrypt_key(pathfile)
+
+
+    def cb_func_show_qr():
+        user = values["-USERNAME-"]
+        mail = values["-MAIL-"]
+    
+        text = values["-RENDERKEY-"]
+        print("no se",text)
+        imagepath = generate_qr(text, user, mail)
+        im = Image.open(imagepath)
+
+        im = im.resize(QR_SIZE, resample=Image.BICUBIC)
+        if im is not None:
+            image = ImageTk.PhotoImage(image=im)
+            window["-QRCODE-"].update(data=image)
+
+
+
+    TOTP_layout_Left = [
+        [sg.Text("User name")],
+        [sg.In(size=(45, 1), enable_events=True, key="-USERNAME-",font='Courier',
+            default_text="Luis Miguel")],
+        [sg.Text("User mail")],
+        [sg.In(size=(45, 1), enable_events=True, key="-MAIL-",font='Courier',
+            default_text="42Barcelona")],
+        [sg.HSeparator()],
+    # [sg.Text("Usa una clave secreta conocida")],
+    # [sg.In(size=(25, 1), enable_events=True, key="-CLAVE-")],
+        [sg.Button("Create key", key="-CREATE-"),sg.In(size=(45, 1), enable_events=True, key="-RANDOM-", font='Courier')],
+        #[sg.Text("Clave secreta generada")],
+        #[sg.In(size=(45, 1), enable_events=True, key="-CLAVE-", font='Courier')],
+        [sg.HSeparator()],
+        [sg.FileBrowse(key="-FILE-"), sg.Text("Uso mi fichero clave", size=(15, 1)), sg.InputText("/path/to/file") ],
+        [sg.HSeparator()],
+        [sg.Text("Introduzco mi clave"), sg.In(size=(45, 1), enable_events=True, key="-USERKEY-", font='Courier')],
+        [sg.Text("Len="),sg.Text("0", key='-CONTADOR-'), sg.Button("Mi clave es OK", key="-USERKEYOK-", disabled= True)],
+        #[sg.Button("Introduzco mi clave", key="-USER-")],
+        
+        [sg.HSeparator()],
+        [sg.In(size=(45, 1), enable_events=True, key="-RENDERKEY-", font='Courier')],
+        [sg.Button("Show QR", key="-RENDER-")],
+        [sg.Text("Clave secreta generada", key="-SECONDS-")],
+    ]
+    TOTP_layout_Right = [
+        [sg.Text("QR CODE")],
+        [sg.Image(size=QR_SIZE,key="-QRCODE-")],
+
+    ]
+    TOTP_layout_down = [
+        [sg.Button("Genera TOTP", key="-TOTP-"),sg.Text("CODE",key="-CODE-")]
+    ]
+    TOTP_layout = [
+        [sg.Column(TOTP_layout_Left),sg.VSeparator(),sg.Column(TOTP_layout_Right)],
+        [sg.HSeparator()],
+        [TOTP_layout_down]
+    ]
+    window = sg.Window(title="Time-based One time Paswword generator - (TOTP)", layout=TOTP_layout , margins=(15, 15))
+    start_time = time.time()
+    my_time = start_time
+    while True:
+        actual_time = time.time()
+        elapsed_time = actual_time - my_time  #  time diff between loops
+        event, values = window.read()
+        print(event)
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+        elif event == "-CREATE-":
+            window['-USERKEY-'].update(disabled = True)
+            window['-FILE-'].update(disabled = True)
+            cb_func_update_key()
+        elif event == "-USERKEY-":
+            window['-CREATE-'].update(disabled = True)
+            window['-FILE-'].update(disabled = True)
+            cb_func_read_user_key(event, values)
+        elif event == "-USERKEYOK-":
+            cb_func_treat_user_key()
+            window['-CREATE-'].update(disabled = True)
+            window['-FILE-'].update(disabled = True)
+        elif event == "-FILE-":
+            window['-CREATE-'].update(disabled = True)
+            window['-USERKEY-'].update(disabled = True)
+        elif event == "-RENDER-":
+            cb_func_show_qr()    
+            window['-CREATE-'].update(disabled = False)
+            window['-USERKEY-'].update(disabled = False)
+            window['-FILE-'].update(disabled = False)
+        elif event == "-TOTP-":
+            totp_key = decrypt_key("ft_otp.key")
+            totp = get_totp_token(totp_key)
+            window['-CODE-'].update(totp)
+            
 
 
 def generate_random_key(len = 40):
@@ -295,13 +418,15 @@ if __name__ == "__main__":
     parser = create_argument_parser()
     
     #args = parser.parse_args(sys.argv[1:])
-    args = parser.parse_args(['-r'])
+    args = parser.parse_args(['--GUI'])
+    #args = parser.parse_args(['-r'])
     #args = parser.parse_args(['-g','ft_otp2.hex'])
     #args = parser.parse_args(['-k','ft_otp.key'])
     #args = parser.parse_args(['-u','Buenos Dias'])
     print("Estos son mis argumentos ",args)
     if args.GUI:
         print("Me han pedido que me ejecute en modo grafico")
+        gui()
         
     else:
         if args.g is not None:

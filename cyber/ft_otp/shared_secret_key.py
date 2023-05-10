@@ -27,17 +27,25 @@ def generate_secret_key(len=20):
     Returns len cryptographically strong pseudo-random bytes
     """
     secret = b''
-    for _ in range(len):
-        v = ssl.RAND_bytes(1)
-        if 50 <= v[0] and v[0] <= 55 or 65 <= v[0] and v[0] <= 90:
+    count = 0
+    while count <= len:
+        v = ssl.RAND_bytes(1) 
+        if 32 <= v[0] and v[0] <= 126:
             secret = secret + v
-        else:
-            found = False
-            while not found:        
-                s = ssl.RAND_bytes(1)
-                if 50 <= s[0] and s[0] <= 55 or 65 <= s[0] and s[0] <= 90:
-                    found = True
-                    secret = secret + s
+            count = count + 1
+
+    return secret
+    """
+    if 50 <= v[0] and v[0] <= 55 or 65 <= v[0] and v[0] <= 90:
+        secret = secret + v
+    else:
+        found = False
+        while not found:        
+            s = ssl.RAND_bytes(1)
+            if 50 <= s[0] and s[0] <= 55 or 65 <= s[0] and s[0] <= 90:
+                found = True
+                secret = secret + s
+    """
         
  
 

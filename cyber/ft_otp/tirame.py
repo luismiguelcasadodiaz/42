@@ -1,12 +1,12 @@
-def hexrep(hexstr, times):
-    result = '0x'
-    for _ in range(times):
-        result = result + hexstr[2:]
+import PySimpleGUI as sg
 
-myhex = b'0xA'
-print("str = ",myhex)
-print("hex = ",myhex.decode())
-print("dec = ",int(myhex, base=16))
-print("bin = ",bin(int(myhex, base=16)))
-repeatedhex = hexrep(myhex,2)
+form_rows = [[sg.Text('Enter 2 files to comare')],
+                 [sg.Text('File 1', size=(15, 1)), sg.InputText(key='file1'), sg.FileBrowse()],
+                 [sg.Text('File 2', size=(15, 1)), sg.InputText(key='file2'), sg.FileBrowse(target='file2')],
+                 [sg.Submit(), sg.Cancel()]]
 
+window = sg.Window('File Compare')
+event, values = window.Layout(form_rows).Read()
+
+print("Event =", event)
+print("Values = ", values)
