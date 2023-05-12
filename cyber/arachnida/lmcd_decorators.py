@@ -1,1 +1,0 @@
-/home/luis/Documentos/python/decorators/LMCD_decorators.py

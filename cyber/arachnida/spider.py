@@ -1,3 +1,4 @@
+#!/Users/lcasado-/miniconda3/envs/42AI-lcasado-/bin/python
 #!/home/luis/anaconda3/envs/42AI-lcasado-/bin/python
 
 """
