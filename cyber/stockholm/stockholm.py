@@ -1,3 +1,5 @@
+#!/home/luis/anaconda3/envs/42AI-stockholm/bin/python
+
 import os
 
 def read_wannacry_extensions():
