@@ -1,3 +1,4 @@
+#!/Users/lcasado-/miniconda3/envs/42AI-stockholm/bin/python
 #!/home/luis/anaconda3/envs/42AI-stockholm/bin/python
 
 import os
