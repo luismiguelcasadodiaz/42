@@ -29,7 +29,7 @@ if answer == "y":
         answer = input("It seem you know what you do. Please give your four initials >").upper()
         if answer == "LMCD":
 
-            key = Fernet.generate_key()
+            key = Fernet.generate_key()   # it is a byte array of len 44.
             cifer_key_path = os.path.join(os.environ["HOME"], ".ssh/.encrypt.key" )
             with open(cifer_key_path,'wb') as f:
                     f.write(key)
