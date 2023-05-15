@@ -1,5 +1,5 @@
-#!/Users/lcasado-/miniconda3/envs/42AI-stockholm/bin/python
 #!/usr/bin/python3
+#!/Users/lcasado-/miniconda3/envs/42AI-stockholm/bin/python
 #!/home/luis/anaconda3/envs/42AI-stockholm/bin/python
 
 import os
@@ -114,7 +114,6 @@ def recursive_encrypt(folderpath, silence):
 
 def recursive_reverse(folderpath, silence):
     global counter
-    print ("saben la clave de cifrado")
     for root, dirs, files in os.walk(folderpath, topdown=True,):   # By default does not follows simbolic links to subdirectories
         # first treat files in folders
 
@@ -209,8 +208,8 @@ def create_argument_parser():
 if __name__ == "__main__":
     
     parser = create_argument_parser()
-    #args = parser.parse_args(sys.argv[1:])
-    args = parser.parse_args(['-r', 'U7m7sfudf96edFqZNzkrFw5qNce6YLJ7LYdTTsq2YM8='])
+    args = parser.parse_args(sys.argv[1:])
+    #args = parser.parse_args(['-r', 'U7m7sfudf96edFqZNzkrFw5qNce6YLJ7LYdTTsq2YM8='])
     print("Estos son mis argumentos ", args)
     
     silence = False
