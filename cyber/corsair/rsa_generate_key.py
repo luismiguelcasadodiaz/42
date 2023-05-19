@@ -1,5 +1,4 @@
-#!/Users/lcasado-/miniconda3/envs/42AI-lcasado-/bin/python3
-#!/home/luis/anaconda3/envs/42AI-lcasado-/bin/python
+#!/usr/local/bin/python3
 
 import rsa
 import os
@@ -8,9 +7,9 @@ t = datetime.datetime.now()
 stamp= f"{t.year:4d}{t.month:0>2}{t.day:0>2}_{t.hour}{t.minute}{t.second}"
 # 2015 5 6 8 53 40
 
-plaintext="42 Barcelona."
+plaintext="42Barcelona"
 homedir = os.environ['HOME']
-for keylength in range(16, 100):
+for keylength in range(170, 180):
     stamp = f"{keylength:0>3}"
     fileNamePub =  stamp + "_public.pem"
     fileNamePri =  stamp + "_private.pem"
@@ -18,7 +17,7 @@ for keylength in range(16, 100):
     pathPub = os.path.join(homedir, ".ssh", fileNamePub)
     pathPri = os.path.join(homedir, ".ssh", fileNamePri)
 
-    (publickey, privateKey) = rsa.newkeys(keylength,True,4)
+    (publickey, privateKey) = rsa.newkeys(keylength)
 
     pubkeypem= publickey.save_pkcs1('PEM')
     prikeypem= privateKey.save_pkcs1('PEM')

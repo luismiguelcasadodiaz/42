@@ -1,4 +1,4 @@
-#!/Users/lcasado-/miniconda3/envs/42AI-lcasado-/bin/python3
+#!/usr/local/bin/python3
 
 from cryptography.hazmat.backends import default_backend  
 from cryptography.hazmat.primitives import serialization  
@@ -21,8 +21,8 @@ stamp= f"{t.year:4d}{t.month:0>2}{t.day:0>2}_{t.hour}{t.minute}{t.second}"
 
 
 homedir = os.environ['HOME']
-for keylength in range(16, 100):
-    stamp = f"{keylength:0>3}"
+for keylength in range(512, 513):
+    stamp = f"{keylength:0>3}_512"
     fileNamePub =  stamp + "_public.pem"
     fileNamePri =  stamp + "_private.pem"
 

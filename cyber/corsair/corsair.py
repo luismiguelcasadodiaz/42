@@ -1,4 +1,4 @@
-#!/home/luis/anaconda3/envs/42AI-lcasado-/bin/python
+#!/usr/local/bin/python3
 
 import os
 import rsa
@@ -60,10 +60,14 @@ for keylength in range(16, 1000):
 
     
     totient = carmichael(pubkey.n)
+    d = modinv(pubkey.e, totient)
     tf = time.time()
     duracion = int(tf - ti)
         
-    print(f"len(n)= {keylength} bits, {duracion:0>3} segundos, n={pubkey.n:0>10}, λ(n) = {totient}")
+    with open("salida.txt", 'a') as f:
+        line = f"len(n)= {keylength} bits, {duracion:0>3} segundos, n={pubkey.n:0>10}, e={pubkey.e}, λ(n) = {totient}, d = {d}\n"
+        f.write(line)
+    print(f"len(n)= {keylength} bits, {duracion:0>3} segundos, n={pubkey.n:0>10}, e={pubkey.e}, λ(n) = {totient}, d = {d}")
 
 """
 len(n)= 16 bits, 000 segundos, n=0000034579, λ(n) = 5700
