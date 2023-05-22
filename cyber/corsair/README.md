@@ -84,7 +84,7 @@ all this you can find it in corsair.py
 I need different approach.
 
 I need pairs of keys with open secret that have common factors. This is only possible if the
-rsa random generator is weak woht low entropy.
+rsa random generator is weak,  with low entropy.
 
 It is quite relevant to me that imported library matters.
 
@@ -170,13 +170,111 @@ deciferedtext = rsa.decrypt(cypheredtext,privkey)
   
 ```
 # find_gcd.py
-I generated 100 pairs of public-private RSA keys wiht a modulus(n) of length of 170 bits
+I generated 100 pairs of public-private RSA keys with a modulus(n) of length of 170 bits
 After calculate 9900 gdc between all diferente 99 pairs i concluded that rsa uses a
 strong primes generator, despite deal wiht 170 bits.
 
 I repeated the experiment wiht a modulus of lenth 90 getting same results.
 
-My final approach is generate the paisr os public and private keys using primes not generated randonlly.
 
 
+My final approach is generate the pairs of public and private keys using primes not generated randomly.
+
+1.- wiht rsa i generate 100 pairs of keys wiht 2048 bits for the mouduls and save all parameters
+
+```
+
+keylength=2048  # I choose this length as it is the minimun to encrypt 42Barcelona
+
+for num in range(100):  #  i generate 100 keys to play with them
+    # Key generation
+    (publickey, privateKey) = rsa.newkeys(keylength)
+    line = f"e={pubkey.e}, n={pubkey.n:>52},d={privkey.d:>52}, p={privkey.p:>28}, q={privkey.q:>25},{plaintext}==>{cypheredtext}\n"
+
+```
+
+An example of the output is this:
+
+---
+e=65537, 
+
+n=17328941834950607110733842651814716676475769238334612209056527755073956524294507416009044547582351732337081195250619421218451671406480616277823417768900642551813473392868185811223980348066848104151064128298019922172429656833486422735413208138547962617717838173933196789105174005992408005611727938985636343060263990145339427014243006058039716477207624098215078777482996114331903098031267522316161824116127029834578075395776946305156738449860576040139092315457448596005624180884527997289368750872051640946903139303661980103441119300931067579242714037814905675890840016912470091219671005990997422904657974711740027171889,
+
+d=6095286131182101639022789276433661120071401383677761884785252266810577929994308328941521505574993852843956783388273477545932037311170654232515760965694151580090699736826486096713844011529929390983571574614736030729494002614180219065516353724000299590515763699673589764292727332440254960484998367281211387265598667040423184074928138206451373992674576959662315100335016201592923584587227709526911518904137896779476555101118408967514029363901356966649501945574122910871452474185278301139452000994196688369818347591687390696012600642965162922284014261396541572647412994140555478998793682507380203447882230608246468433777,
+
+p=2438593310261074657282043163376290856047222440000419075612452801035390644758889499482865075970053142986916368260984858690118496306023036284680524966770279394068431807148336577519722485636930557224182394703700065632044053829756756845734485338498233667494865837330182593896052648121623458208640331155181192046654120922889117408243, 
+
+q=7106122108198262348522407478614701756903907760914086476746983907364481778251431024879716532839231532537338659994546536609077608469996401195324704067631102143259157263411944667072123556656545310258351456012224748216378364932703949312438531510368391333781777972803199738627758553181605506123,
+
+4==>b'_\x13+\x03\xdb\xae\x94\xd8\xcb>k\x89U\x83\xe7fg\xa3^\xbd\x94\x96\x84o\xdc\xcf\x13\xc2\x19\x08B\xf5gy\x90\xabI`\xc5g2\x9a\xc1^#S\xf0t\xe6\x8f6\xa1&\x98\x91\xf9\xbbk\xe4\xee\xe2\xa6\x87w\xef\x0f\xe1*\x9en\xc3$]\xbd\xc8\xcd\x98v\x0b\xac\x99 \x00\x97m\xbev3k\x0eXT5\x0fj$\xfc\xaeC\x1b\xaa\xa0\xb0\xaa%\xc9\xba8@\x05\xfd\xc0q\x14\xb1\xef\xcb\\\xf6\xdc#\xe0\x8eX\xed\xc0\x9b\xf3\xb1\xeb\x837v"_t\x0b\xb8\xe2\xd3\xee\x87\x04\xb5\r`p\x1b\x15\xbf\xbf\x1a#\xc0\x07\xbc\x8f/\xbc\x0f\xd7+\xe7\xa3\xb0\xcd\x1e\xd9\xd4\x06D\x8d\x98w\'\x89\xb5\xaf9\xb0I\xb7\x12D\x08,9D|\xac\x1dE\x8f\xe3;\xfa+\xe8\xa9\xc7\x9e\r\xcf\xb0"\x92=\xdc<T\x89Y\xb7\x86\x8dbU\xa5\xe8f\xfa\x1b\x9d\xc3\xe5\xce\x1d"e!\xa8\xbb\x15\xd7P#\xae\x9a9\xad"\xa8\x12K~m\xcd\xf7r\xcb$\xeb\xd8- \x1d'
+
+---
+
+2.- I collect the qs in a file and choose one p. All qs and the P are prime positive integers
+
+I will use the above p
+
+```
+    from Crypto.PublicKey import RSA
+    #generate a fake public key
+    p = 2438593310261074657282043163376290856047222440000419075612452801035390644758889499482865075970053142986916368260984858690118496306023036284680524966770279394068431807148336577519722485636930557224182394703700065632044053829756756845734485338498233667494865837330182593896052648121623458208640331155181192046654120922889117408243
+    q = theqs[num]
+    n = p*q
+    e = 65537
+    rsa_components = (n,e)
+   
+    rsa_key= RSA.construct(rsa_components,consistency_check=True,)
+    fake_public_key  = rsa_key.export_key(format='PEM',pkcs=1)
+
+```
+
+3.- Cyper the plain text in this way
+
+```
+    from Crypto.Cipher import PKCS1_OAEP
+    from Crypto.PublicKey import RSA
+    # reading public key
+    with open(pathPub,'r') as publicfile:
+        publickey = RSA.import_key(publicfile.read())
+    
+    
+    # create an encrypter    
+    cipher = PKCS1_OAEP.new(publickey)
+
+    ciphertext = cipher.encrypt(plaintext.encode())
+
+    with open(pathEnc, 'wb') as f:
+        f.write(ciphertext)
+
+```
+
+4.- Uncover common factors between ns from public keys.
+
+As i have created 100 public keys, for each one of them i try to find commond divisor wiht other 99 public keys
+
+```
+
+for num in range(100):  #  i generated 100 keys to play with them
+    # reading first public key
+    # ...... more code here
+    with open(pathPub,'rb') as publicfile:
+        publickey1 = RSA.import_key(publicfile.read())
+
+    for num2 in range(100):  #  i generated 100 keys to play with them
+    # ...... more code here
+        if pathPub != pathPub2:
+
+            # reading first public key
+            with open(pathPub2,'rb') as publicfile2:
+                publickey2 = RSA.import_key(publicfile2.read())
+
+            gcd_n1_n2 = gcd(publickey1.n, publickey2.n)
+
+            if gcd_n1_n2 != 1:  # figure out how to track this factor
+
+```
+
+This gcd_n1_n2 is a p in n1 = p * q1 and n2 = p * q2
+
+at this point it is possible to calculate q1 as n1 // p  and q2 as n2 // p
 

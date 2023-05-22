@@ -9,7 +9,7 @@ plaintext = "42Barcelona"
 keylength=170  # I choose this length as it is the minimun to encrypt 42Barcelona
 
 plaintext = "4"
-keylength=90  # I choose this length as it is the minimun to encrypt 42Barcelona
+keylength=2048  # I choose this length as it is the minimun to encrypt 42Barcelona
 
 for num in range(100):  #  i generate 100 keys to play with them
 

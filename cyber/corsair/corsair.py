@@ -35,7 +35,7 @@ def carmichael(n):
     return k
 
 homedir = os.environ['HOME']
-for keylength in range(16, 1000):
+for keylength in range(32, 1000):
     ti = time.time()
     stamp = stamp = f"{keylength:0>3}"
     fileNamePub = stamp + "_public.pem"

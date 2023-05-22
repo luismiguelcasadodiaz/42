@@ -58,7 +58,7 @@ for num in range(100):  #  i generated 100 keys to play with them
 
             gcd_n1_n2 = gcd(pubkey1.n, pubkey2.n)
 
-            if gcd_n1_n2 == 1:
+            if gcd_n1_n2 != 1:
                 primescoutn +=1
                 print(f"{num:0>3}-{num2:0>3} n1={pubkey1.n} n2={pubkey2.n} p= {gcd_n1_n2}")
                 if gcd_n1_n2 in gcd_dict.keys():

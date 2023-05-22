@@ -1,4 +1,5 @@
 #!/Users/lcasado-/miniconda3/envs/42AI-lcasado-/bin/python3
+
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 
@@ -17,7 +18,7 @@ t = datetime.datetime.now()
 stamp= f"{t.year:4d}{t.month:0>2}{t.day:0>2}_{t.hour}{t.minute}{t.second}"
 # 2015 5 6 8 53 40
 
-plaintext = "42Barcelona"
+plaintext = "Barcelona"
 
 homedir = os.environ['HOME']
 theqspathfile = os.path.join(homedir, "Documents/42/cyber/corsair/theqs.txt")
@@ -39,7 +40,7 @@ for num in range(len(theqs)):
    pathEnc = os.path.join(homedir, ".ssh", fileNameEnc)
   
    #generate a fake public key
-   p = 883917408761540583465821249
+   p = 2438593310261074657282043163376290856047222440000419075612452801035390644758889499482865075970053142986916368260984858690118496306023036284680524966770279394068431807148336577519722485636930557224182394703700065632044053829756756845734485338498233667494865837330182593896052648121623458208640331155181192046654120922889117408243
    q = theqs[num]
    n = p*q
    e = 65537
