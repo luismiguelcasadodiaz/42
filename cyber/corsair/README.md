@@ -1,21 +1,27 @@
-# corsair.py
+# Approach **ONE**
+## corsair.py
 
 After studing RSA mathematics i learnt that is mathemattically possible obtaing a private key
 from a public key.
 
-given p & q positive big primes
+Given p & q positive big primes.
 
-being e (exponent) = 65537 and n (modulus) = p * q 
+Being e (exponent) = 65537 and n (modulus) = p * q.
 
-n is the open secret (Ellis - 1970)
+n is the open secret (Ellis - 1970).
 
 encryption : C = pow(M,e) mod n   
 decryption : M = pow(C,d) mod n
 
-From public key we con go to private key with this formula
-d * e congruent wiht 1 * (mod λ(n))
+From public key we con go to private key with this formula:
+d = modular inverse of (e, λ(n))
 
-d is de **modular multiplier inverse** of e and λ(n)
+λ(n) is the Carmichael totien function.
+
+a ** k congruent with 1  (mod n)
+meaning that for every **a**, smaller than **n**, and coprime with **n**, **k** is the smallest number that pow(a, k) % n = 1.
+
+d is de **modular multiplier inverse** of e and λ(n).
 
 ```
 def modinv(a,m):
@@ -24,7 +30,7 @@ def modinv(a,m):
         raise Exception('No modular inverse')
     return x%m
 ```
-λ(n) is the Carmichael totien function
+
 
 ```
 def carmichael(n):
@@ -53,7 +59,7 @@ def egcd(a,b):
 Althoug it is mathematically possible to infer private key from public key, computationally
 is not possible nowadays.
 
-I timeit the algorithm with these results
+I timeit the algorithm with these results:
 
 
 |len(n)  |(secs)| n            | e   |λ(n)     |d
@@ -77,9 +83,10 @@ I timeit the algorithm with these results
 |512 bits| ???? |  n=10198396198775561957312427155980896031621481057689583114412695093823692869122007487913250993135767612909846550167087384856500083695811014490975969639561161|65537|?|?|
 
 
-all this you can find it in corsair.py
-
-# openssl_generate_key.py & rsa_generate_key.py
+All this you can find it in corsair.py.
+It is mathematically feasible but computationally impracticable.
+# Approach **TWO**
+## openssl_generate_key.py & rsa_generate_key.py
 
 I need different approach.
 
@@ -88,7 +95,7 @@ rsa random generator is weak,  with low entropy.
 
 It is quite relevant to me that imported library matters.
 
-Working in corsair 42 Barcelona cybersecyrity bootcamp Challenge I uncovered that
+I uncovered that
 ```
 import rsa
 (publickey, privateKey)  rsa.newkeys(keylength,True,4)  
@@ -161,26 +168,26 @@ required to hold n
 
 Another learning is about decoding. 
 I have to encrypt a bytes array, so i encode the plaintext
-I have to decode the encrypted tokes as it is.
+I have to decode the encrypted token as it is.
 
-I tryed otherwise and i got errors
+I tryed otherwise and i got errors.
 ```
 cypheredtext = rsa.encrypt(plaintext.encode(),pubkey,)
 deciferedtext = rsa.decrypt(cypheredtext,privkey)
   
 ```
-# find_gcd.py
+## rsa_find_gcd.py
 I generated 100 pairs of public-private RSA keys with a modulus(n) of length of 170 bits
 After calculate 9900 gdc between all diferente 99 pairs i concluded that rsa uses a
 strong primes generator, despite deal wiht 170 bits.
 
 I repeated the experiment wiht a modulus of lenth 90 getting same results.
 
-
-
+# APPROACH **THREE**
+## Crypto_generate_key.py
 My final approach is generate the pairs of public and private keys using primes not generated randomly.
-
-1.- wiht rsa i generate 100 pairs of keys wiht 2048 bits for the mouduls and save all parameters
+## rsa___encryp_msg.py
+1.- wiht rsa i generate 100 pairs of keys wiht 2048 bits for the moduls and save all parameters
 
 ```
 
@@ -189,7 +196,10 @@ keylength=2048  # I choose this length as it is the minimun to encrypt 42Barcelo
 for num in range(100):  #  i generate 100 keys to play with them
     # Key generation
     (publickey, privateKey) = rsa.newkeys(keylength)
-    line = f"e={pubkey.e}, n={pubkey.n:>52},d={privkey.d:>52}, p={privkey.p:>28}, q={privkey.q:>25},{plaintext}==>{cypheredtext}\n"
+     with open("salida_encryp.txt", 'a') as f:
+
+        line = f"e={pubkey.e}, n={pubkey.n:>52},d={privkey.d:>52}, p={privkey.p:>28}, q={privkey.q:>25},{plaintext}==>{cypheredtext}\n"
+        f.write(line)
 
 ```
 
@@ -210,15 +220,24 @@ q=710612210819826234852240747861470175690390776091408647674698390736448177825143
 
 ---
 
-2.- I collect the qs in a file and choose one p. All qs and the P are prime positive integers
+2.- I collect the qs in a file. I collect the ps in a file. All qs and the P are prime positive integers
 
-I will use the above p
+```
+Bash $ cat salida_encryp.txt | cut -d ',' -f4  | sed  's/p=//g' > theps.txt
+Bash $ cat salida_encryp.txt | cut -d ',' -f5  | sed  's/q=//g' > theqs.txt
+
+```
+# Crypto_generate_fake_key.py
+3.- My prime generator with low entropy will use random.randrange(0,24) for selecting from a 25 size small subset of ps and qs.
+    I generate 100 *fake* public keys.
+
 
 ```
     from Crypto.PublicKey import RSA
     #generate a fake public key
-    p = 2438593310261074657282043163376290856047222440000419075612452801035390644758889499482865075970053142986916368260984858690118496306023036284680524966770279394068431807148336577519722485636930557224182394703700065632044053829756756845734485338498233667494865837330182593896052648121623458208640331155181192046654120922889117408243
-    q = theqs[num]
+    idx = random.randrange(0,24)
+    p = theps[idx]
+    q = theqs[idx]
     n = p*q
     e = 65537
     rsa_components = (n,e)
@@ -227,8 +246,8 @@ I will use the above p
     fake_public_key  = rsa_key.export_key(format='PEM',pkcs=1)
 
 ```
-
-3.- Cyper the plain text in this way
+# Crypto___encryp_msg.py
+4.- Ciper plaintext wiht the different 100 fake public keys in this way.
 
 ```
     from Crypto.Cipher import PKCS1_OAEP
@@ -247,20 +266,20 @@ I will use the above p
         f.write(ciphertext)
 
 ```
-
-4.- Uncover common factors between ns from public keys.
+# Crypto_find_gcd.py
+5.- Uncover common factors between ns from the 100 fake public keys.
 
 As i have created 100 public keys, for each one of them i try to find commond divisor wiht other 99 public keys
 
 ```
 
-for num in range(100):  #  i generated 100 keys to play with them
+for num in range(0, 100):  #  i generated 100 keys to play with them
     # reading first public key
     # ...... more code here
     with open(pathPub,'rb') as publicfile:
         publickey1 = RSA.import_key(publicfile.read())
 
-    for num2 in range(100):  #  i generated 100 keys to play with them
+    for num2 in range(num + 1, 100):  #  i generated 100 keys to play with them
     # ...... more code here
         if pathPub != pathPub2:
 
@@ -271,10 +290,37 @@ for num in range(100):  #  i generated 100 keys to play with them
             gcd_n1_n2 = gcd(publickey1.n, publickey2.n)
 
             if gcd_n1_n2 != 1:  # figure out how to track this factor
+                if gcd_n1_n2 in gcd_dict.keys():
+                    gcd_dict[gcd_n1_n2].append((num, num2))
+                else:
+                    gcd_dict[gcd_n1_n2] = [(num, num2)]
 
 ```
+i use a dictionary for registering common factors and pairs of fake public keys
 
-This gcd_n1_n2 is a p in n1 = p * q1 and n2 = p * q2
+181772......22875527:[(61, 81)]
+199546......13919607:[(69, 75)]
+262964......95484463:[(76, 93)]
 
-at this point it is possible to calculate q1 as n1 // p  and q2 as n2 // p
+Found commond factores are saved in file common_factors.txt
+
+Playing wiht my level of entropy i created this table that show entropy importance.
+
+
+|entropy               |   |% collisions|
+|----------------------|---|:----------:|
+|random.randrange(0,99)| 46|0,93%|
+|random.randrange(0,49)|111|2,24%|
+|random.randrange(0,24)|207|4.18%|
+|random.randrange(0,12)|426|8,60%|
+
+# Crypto_deencryp_msg.py
+
+Previous gcd_n1_n2 is a p in n1 = p * q1 and n2 = p * q2
+
+At this point it is possible to calculate q1 as n1 // p  and q2 as n2 // p, construct a private key and unciphe the message.
+
+
+
+
 
