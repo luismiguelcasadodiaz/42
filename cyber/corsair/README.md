@@ -1,3 +1,25 @@
+# 42 Barcelona Cybersecurity bootcamp - RSA asymetric key study.
+
+The aim of this exercise is to introduced the bootcamper inside RSA and make me aware of
+the importance of entropy in primes generation.
+
+I have to proof that it is posible break RSA security when we use weak random generation
+
+
+Please execute the files in this order
+
+
+1.- rsa___encryp_msg.py    # generates real e,n,p,q,d of RSA asymetric keys
+
+2.- Inside of folder files   # select ps and qs 
+    Bash $ cat salida_encryp.txt | cut -d ',' -f4  | sed  's/p=//g' > theps.txt
+    Bash $ cat salida_encryp.txt | cut -d ',' -f5  | sed  's/q=//g' > theqs.txt
+
+
+3.- Crypto_generate_fake_key.py  # creates RSA asymetric keys with low entropy and ciphers messages
+4.- Crypto_find_gcd.py           # detects common ps
+5.- Crypto_deencryp_msg.py       # creates private kesy form public keys
+
 # Approach **ONE**
 ## corsair.py
 
@@ -318,9 +340,35 @@ Playing wiht my level of entropy i created this table that show entropy importan
 
 Previous gcd_n1_n2 is a p in n1 = p * q1 and n2 = p * q2
 
-At this point it is possible to calculate q1 as n1 // p  and q2 as n2 // p, construct a private key and unciphe the message.
+At this point it is possible to calculate q1 as n1 // p  and q2 as n2 // p, construct a private key and uncipher the message.
+
+To do that we recover de function used in the first approach. egdc and modinv.
+
+1.- From common_factors.txt i read P and a list of tuples
+
+```
+            p = int(factor)
+            n = publickey.n
+            exp = publickey.e
+            q = n // p
+            try:
+                T = (p - 1) * (q - 1)
+                d = modinv(exp, T)
+            except:
+                d = None
+            rsa_components = (n,exp,d,p,q)
+
+            privatekey= rsa_key= RSA.construct(rsa_components,consistency_check=True)
 
 
 
 
 
+# Files
+
+p_q_nnn_public.pem    100 fake public keys with n of 2048 bits length
+2048_nnn_public.pem   100 public keys with n of 2048 bits length
+2048_nnn_private.pem  100 private keys with n of 2048 bits length
+2048_nnn_mesagge.enc  100 encryptions of plaintext "42Barcelona" wiht 100 different 2048_nnn_public.pem keys
+nnn_public.pem        one public key with n of nnn bits length   nnn= 016..179       
+nnn_private.pem       one Prvate key with n of nnn bits length   nnn= 016..179
