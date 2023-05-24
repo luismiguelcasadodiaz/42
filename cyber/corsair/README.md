@@ -348,7 +348,8 @@ At this point it is possible to calculate q1 as n1 // p  and q2 as n2 // p, cons
 
 To do that we recover de function used in the first approach. egdc and modinv.
 
-1.- From common_factors.txt i read P and a list of tuples
+1.- From common_factors.txt i read P and a list of tuples that share p as common factor
+
 
 ```
             p = int(factor)
@@ -364,7 +365,7 @@ To do that we recover de function used in the first approach. egdc and modinv.
 
             privatekey= rsa_key= RSA.construct(rsa_components,consistency_check=True)
 
-
+```
 
 
 
