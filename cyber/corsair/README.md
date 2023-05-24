@@ -3,21 +3,25 @@
 The aim of this exercise is to introduced the bootcamper inside RSA and make me aware of
 the importance of entropy in primes generation.
 
-I have to proof that it is posible break RSA security when we use weak random generation
+I have to proof that it is posible break RSA security when we use weak random generation.
 
 
-Please execute the files in this order
+Please execute the files in this order:
 
 
-1.- rsa___encryp_msg.py    # generates real e,n,p,q,d of RSA asymetric keys
+1.- rsa___encryp_msg.py    # generates real e,n,p,q,d of RSA asymetric keys.
 
-2.- Inside of folder files   # select ps and qs 
+2.- Inside of folder files   # select ps and qs
+
+```
     Bash $ cat salida_encryp.txt | cut -d ',' -f4  | sed  's/p=//g' > theps.txt
     Bash $ cat salida_encryp.txt | cut -d ',' -f5  | sed  's/q=//g' > theqs.txt
-
+```
 
 3.- Crypto_generate_fake_key.py  # creates RSA asymetric keys with low entropy and ciphers messages
+
 4.- Crypto_find_gcd.py           # detects common ps
+
 5.- Crypto_deencryp_msg.py       # creates private kesy form public keys
 
 # Approach **ONE**
